@@ -65,17 +65,20 @@ const NUMERIC_TO_STRING_ID: Record<string, string> = {
 
 export async function GET() {
   try {
-    // Build URL with query params - matching Python requests behavior
-    const url = new URL(API_URL);
-    for (const [key, value] of Object.entries(API_PARAMS)) {
-      url.searchParams.append(key, value);
-    }
+    // Build URL manually to match Python's requests library encoding exactly
+    // URLSearchParams double-encodes some characters which can cause issues
+    const queryString = Object.entries(API_PARAMS)
+      .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+      .join('&');
+    const fullUrl = `${API_URL}?${queryString}`;
+
+    console.log('[eBilet] Fetching URL:', fullUrl.substring(0, 150) + '...');
 
     // Add timeout like Python script (10 seconds)
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-    const response = await fetch(url.toString(), {
+    const response = await fetch(fullUrl, {
       method: 'GET',
       cache: 'no-store',
       signal: controller.signal,
