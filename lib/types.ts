@@ -23,6 +23,17 @@ export interface ApiResponse {
   sfc: Record<string, number>;
 }
 
+export interface TicketSnapshot {
+  id: number;
+  timestamp: string;
+  total_available: number;
+  raw_data: Record<string, number>;
+}
+
+export interface HistoryResponse {
+  history: HistoryPoint[];
+}
+
 export const SECTORS: Record<string, { name: string; zone: 'red' | 'yellow' | 'green' | 'ga' }> = {
   "218143106950759092": { name: "D11", zone: "green" },
   "218143106950759093": { name: "D14", zone: "yellow" },

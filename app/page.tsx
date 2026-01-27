@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 import { SECTORS, WATCHED_SECTORS, SectorData, HistoryPoint, ZoneSummary, ApiResponse } from '@/lib/types';
-import { fetchTicketData } from '@/lib/api';
+import { fetchTicketData, fetchHistory } from '@/lib/api';
 import { RefreshCw, AlertCircle } from 'lucide-react';
 
 const REFRESH_INTERVAL = 60000; // 1 minute
@@ -38,16 +38,25 @@ export default function Dashboard() {
   const [previousSectors, setPreviousSectors] = useState<Map<string, number>>(new Map());
   const { toast } = useToast();
 
+  const loadHistory = useCallback(async () => {
+    try {
+      const historyData = await fetchHistory(24);
+      setHistory(historyData.history);
+    } catch (err) {
+      console.error('[v0] Failed to load history:', err);
+    }
+  }, []);
+
   const loadData = useCallback(async () => {
     try {
       setError(null);
       const data: ApiResponse = await fetchTicketData();
-      
+
       const sectorArray: SectorData[] = Object.entries(data.sfc)
         .map(([id, available]) => {
           const sectorInfo = SECTORS[id];
           if (!sectorInfo) return null;
-          
+
           return {
             id,
             name: sectorInfo.name,
@@ -71,7 +80,7 @@ export default function Dashboard() {
       });
 
       setSectors(sectorArray);
-      
+
       // Update previous sectors state
       const newPreviousSectors = new Map<string, number>();
       sectorArray.forEach(sector => {
@@ -79,35 +88,27 @@ export default function Dashboard() {
       });
       setPreviousSectors(newPreviousSectors);
 
-      // Calculate total and update history
-      const totalAvailable = sectorArray.reduce((sum, s) => sum + s.available, 0);
-      const timestamp = Date.now();
-      
-      setHistory(prev => {
-        const newHistory = [...prev, { timestamp, totalAvailable }];
-        // Keep only last 1 hour of data
-        const oneHourAgo = timestamp - 3600000;
-        return newHistory.filter(h => h.timestamp > oneHourAgo);
-      });
-      
-      setLastUpdate(timestamp);
+      // Reload history from database (includes the snapshot just saved)
+      await loadHistory();
+
+      setLastUpdate(Date.now());
       setLoading(false);
     } catch (err) {
       console.error('[v0] Failed to load ticket data:', err);
       setError('Failed to load ticket data. Please try again later.');
       setLoading(false);
     }
-  }, [previousSectors, toast]);
+  }, [previousSectors, toast, loadHistory]);
 
   useEffect(() => {
-    // Load initial data
-    loadData();
+    // Load history from database first, then current data
+    loadHistory().then(() => loadData());
 
     // Set up auto-refresh
     const interval = setInterval(loadData, REFRESH_INTERVAL);
 
     return () => clearInterval(interval);
-  }, [loadData]);
+  }, []);
 
   useEffect(() => {
     // Update seconds since last update
@@ -120,13 +121,21 @@ export default function Dashboard() {
 
   // Calculate statistics
   const totalAvailable = sectors.reduce((sum, s) => sum + s.available, 0);
-  
-  const ticketsSoldLastHour = history.length > 0 
-    ? (history[0].totalAvailable - totalAvailable) 
+
+  // Find data point from ~1 hour ago for "sold last hour" calculation
+  const oneHourAgo = Date.now() - 3600000;
+  const hourAgoPoint = history.find(h => h.timestamp >= oneHourAgo) || history[0];
+
+  const ticketsSoldLastHour = hourAgoPoint
+    ? Math.max(0, hourAgoPoint.totalAvailable - totalAvailable)
     : 0;
 
-  const salesRate = history.length > 1 
-    ? ticketsSoldLastHour / ((Date.now() - history[0].timestamp) / 60000) 
+  const timeSinceHourAgo = hourAgoPoint
+    ? (Date.now() - hourAgoPoint.timestamp) / 60000
+    : 0;
+
+  const salesRate = timeSinceHourAgo > 0
+    ? ticketsSoldLastHour / timeSinceHourAgo
     : 0;
 
   const minutesToSellout = salesRate > 0 ? totalAvailable / salesRate : 0;

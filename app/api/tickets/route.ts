@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { insertSnapshot } from '@/lib/db-queries';
 
 // Force dynamic rendering - disable all caching
 export const dynamic = 'force-dynamic';
@@ -75,11 +76,20 @@ export async function GET() {
     }
 
     const data = await response.json();
-    console.log('[eBilet] Success! Got', Object.keys(data.sfc || {}).length, 'sectors');
+    const sfc = data.sfc || {};
+    console.log('[eBilet] Success! Got', Object.keys(sfc).length, 'sectors');
 
-    return NextResponse.json({
-      sfc: data.sfc || {}
-    });
+    // Calculate total and save to database
+    const totalAvailable = Object.values(sfc as Record<string, number>).reduce((sum, val) => sum + val, 0);
+    try {
+      await insertSnapshot(totalAvailable, sfc);
+      console.log('[eBilet] Saved snapshot to database');
+    } catch (dbError) {
+      console.error('[eBilet] Failed to save to database:', dbError);
+      // Continue even if database save fails
+    }
+
+    return NextResponse.json({ sfc });
 
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
