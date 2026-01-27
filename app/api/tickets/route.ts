@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server';
 
+// Force dynamic rendering - disable all caching
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const API_URL = 'https://sklep.ebilet.pl/api/event/getsectorfreeseatscount';
+const EVENT_ID = '218143106950758457';
 const API_PARAMS = {
-  eid: '218143106950758457',
+  eid: EVENT_ID,
   sids: '{"334:335:336":[696,697,698,699,560,582,595,596,597,598,583,584,585,586,701,587,588,589,590,621,599,600,601,602,606,676,677,678,679,692,693,700,682,683,685,688,689,690,686,695,681,691,674,675,694]}',
   ec: 'null',
   exid: '',
@@ -60,40 +65,63 @@ const NUMERIC_TO_STRING_ID: Record<string, string> = {
 
 export async function GET() {
   try {
+    // Build URL with query params - matching Python requests behavior
     const url = new URL(API_URL);
     for (const [key, value] of Object.entries(API_PARAMS)) {
       url.searchParams.append(key, value);
     }
 
+    // Add timeout like Python script (10 seconds)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
     const response = await fetch(url.toString(), {
+      method: 'GET',
       cache: 'no-store',
+      signal: controller.signal,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       },
     });
 
+    clearTimeout(timeoutId);
+
     if (!response.ok) {
-      console.error('[v0] eBilet API error:', response.status);
+      console.error('[eBilet] API error:', response.status, response.statusText);
       throw new Error(`API returned status ${response.status}`);
     }
 
     const data = await response.json();
-    
+
+    // Debug: log raw response
+    console.log('[eBilet] Raw API response keys:', Object.keys(data));
+    console.log('[eBilet] sfc keys count:', Object.keys(data.sfc || {}).length);
+
     // Convert numeric IDs to string IDs
     const convertedSfc: Record<string, number> = {};
     for (const [numericId, count] of Object.entries(data.sfc || {})) {
       const stringId = NUMERIC_TO_STRING_ID[numericId];
       if (stringId) {
         convertedSfc[stringId] = count as number;
+      } else {
+        console.log('[eBilet] Unknown numeric ID:', numericId);
       }
     }
+
+    console.log('[eBilet] Converted sfc count:', Object.keys(convertedSfc).length);
 
     return NextResponse.json({
       sfc: convertedSfc
     });
   } catch (error) {
-    console.error('[v0] Error fetching from eBilet API:', error);
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.error('[eBilet] Request timeout after 10 seconds');
+      return NextResponse.json(
+        { error: 'Request timeout' },
+        { status: 504 }
+      );
+    }
+    console.error('[eBilet] Error fetching from API:', error);
     return NextResponse.json(
       { error: 'Failed to fetch ticket data' },
       { status: 500 }
