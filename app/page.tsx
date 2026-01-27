@@ -1,0 +1,236 @@
+'use client';
+
+import { useEffect, useState, useCallback } from 'react';
+import { StatsCard } from '@/components/stats-card';
+import { ZoneCard } from '@/components/zone-card';
+import { VelocityChart } from '@/components/velocity-chart';
+import { SectorTable } from '@/components/sector-table';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { Toaster } from '@/components/ui/toaster';
+import { SECTORS, WATCHED_SECTORS, SectorData, HistoryPoint, ZoneSummary, ApiResponse } from '@/lib/types';
+import { fetchTicketData } from '@/lib/api';
+import { RefreshCw, AlertCircle } from 'lucide-react';
+
+const REFRESH_INTERVAL = 30000; // 30 seconds
+
+const ZONE_COLORS = {
+  red: '#ef4444',
+  yellow: '#eab308',
+  green: '#22c55e',
+  ga: '#3b82f6',
+};
+
+const ZONE_NAMES = {
+  red: 'Strefa Czerwona',
+  yellow: 'Strefa Żółta',
+  green: 'Strefa Zielona',
+  ga: 'General Admission',
+};
+
+export default function Dashboard() {
+  const [sectors, setSectors] = useState<SectorData[]>([]);
+  const [history, setHistory] = useState<HistoryPoint[]>([]);
+  const [lastUpdate, setLastUpdate] = useState<number>(Date.now());
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [secondsSinceUpdate, setSecondsSinceUpdate] = useState(0);
+  const [previousSectors, setPreviousSectors] = useState<Map<string, number>>(new Map());
+  const { toast } = useToast();
+
+  const loadData = useCallback(async () => {
+    try {
+      setError(null);
+      const data: ApiResponse = await fetchTicketData();
+      
+      const sectorArray: SectorData[] = Object.entries(data.sfc)
+        .map(([id, available]) => {
+          const sectorInfo = SECTORS[id];
+          if (!sectorInfo) return null;
+          
+          return {
+            id,
+            name: sectorInfo.name,
+            zone: sectorInfo.zone,
+            available,
+          };
+        })
+        .filter((s): s is SectorData => s !== null);
+
+      // Check for watched sectors that got new tickets
+      sectorArray.forEach(sector => {
+        if (WATCHED_SECTORS.includes(sector.name)) {
+          const previousAvailable = previousSectors.get(sector.id);
+          if (previousAvailable !== undefined && previousAvailable === 0 && sector.available > 0) {
+            toast({
+              title: '🎟️ Tickets Available!',
+              description: `Sector ${sector.name} now has ${sector.available} tickets available!`,
+            });
+          }
+        }
+      });
+
+      setSectors(sectorArray);
+      
+      // Update previous sectors state
+      const newPreviousSectors = new Map<string, number>();
+      sectorArray.forEach(sector => {
+        newPreviousSectors.set(sector.id, sector.available);
+      });
+      setPreviousSectors(newPreviousSectors);
+
+      // Calculate total and update history
+      const totalAvailable = sectorArray.reduce((sum, s) => sum + s.available, 0);
+      const timestamp = Date.now();
+      
+      setHistory(prev => {
+        const newHistory = [...prev, { timestamp, totalAvailable }];
+        // Keep only last 1 hour of data
+        const oneHourAgo = timestamp - 3600000;
+        return newHistory.filter(h => h.timestamp > oneHourAgo);
+      });
+      
+      setLastUpdate(timestamp);
+      setLoading(false);
+    } catch (err) {
+      console.error('[v0] Failed to load ticket data:', err);
+      setError('Failed to load ticket data. Please check CORS settings or use a proxy.');
+      setLoading(false);
+    }
+  }, [previousSectors, toast]);
+
+  useEffect(() => {
+    // Load initial data
+    loadData();
+
+    // Set up auto-refresh
+    const interval = setInterval(loadData, REFRESH_INTERVAL);
+
+    return () => clearInterval(interval);
+  }, [loadData]);
+
+  useEffect(() => {
+    // Update seconds since last update
+    const interval = setInterval(() => {
+      setSecondsSinceUpdate(Math.floor((Date.now() - lastUpdate) / 1000));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [lastUpdate]);
+
+  // Calculate statistics
+  const totalAvailable = sectors.reduce((sum, s) => sum + s.available, 0);
+  
+  const ticketsSoldLastHour = history.length > 0 
+    ? (history[0].totalAvailable - totalAvailable) 
+    : 0;
+
+  const salesRate = history.length > 1 
+    ? ticketsSoldLastHour / ((Date.now() - history[0].timestamp) / 60000) 
+    : 0;
+
+  const minutesToSellout = salesRate > 0 ? totalAvailable / salesRate : 0;
+  const selloutDate = salesRate > 0 
+    ? new Date(Date.now() + minutesToSellout * 60000) 
+    : null;
+
+  // Calculate zone summaries
+  const zoneSummaries: ZoneSummary[] = Object.entries(ZONE_NAMES).map(([zone, name]) => {
+    const zoneSectors = sectors.filter(s => s.zone === zone);
+    return {
+      name,
+      zone: zone as 'red' | 'yellow' | 'green' | 'ga',
+      totalAvailable: zoneSectors.reduce((sum, s) => sum + s.available, 0),
+      totalSectors: zoneSectors.length,
+      soldOutSectors: zoneSectors.filter(s => s.available === 0).length,
+      color: ZONE_COLORS[zone as keyof typeof ZONE_COLORS],
+    };
+  });
+
+  if (loading && sectors.length === 0) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <RefreshCw className="h-12 w-12 animate-spin text-primary mx-auto" />
+          <p className="text-muted-foreground">Loading ticket data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Toaster />
+      
+      <div className="container mx-auto p-4 md:p-8 space-y-8">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-4xl font-bold text-foreground mb-2">eBilet Monitor</h1>
+            <p className="text-muted-foreground">Real-time ticket availability tracking</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="text-sm text-muted-foreground">
+              Last updated: {secondsSinceUpdate}s ago
+            </div>
+            <Button onClick={loadData} variant="outline" size="sm">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
+          </div>
+        </div>
+
+        {error && (
+          <div className="flex items-center gap-2 p-4 rounded-lg border border-destructive/50 bg-destructive/10 text-destructive">
+            <AlertCircle className="h-5 w-5" />
+            <p className="text-sm">{error}</p>
+          </div>
+        )}
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <StatsCard
+            title="Total Available"
+            value={totalAvailable.toLocaleString()}
+            subtitle="tickets remaining"
+          />
+          <StatsCard
+            title="Sold Last Hour"
+            value={ticketsSoldLastHour.toLocaleString()}
+            subtitle="tickets"
+            trend={ticketsSoldLastHour > 0 ? 'up' : 'neutral'}
+            trendValue={ticketsSoldLastHour > 0 ? `${ticketsSoldLastHour} sold` : 'No change'}
+          />
+          <StatsCard
+            title="Sales Velocity"
+            value={salesRate.toFixed(1)}
+            subtitle="tickets per minute"
+          />
+          <StatsCard
+            title="Sellout Estimate"
+            value={selloutDate ? selloutDate.toLocaleDateString() : 'N/A'}
+            subtitle={selloutDate ? selloutDate.toLocaleTimeString() : 'Insufficient data'}
+          />
+        </div>
+
+        {/* Velocity Chart */}
+        {history.length > 1 && (
+          <VelocityChart history={history} />
+        )}
+
+        {/* Zone Cards */}
+        <div>
+          <h2 className="text-2xl font-bold text-foreground mb-4">Zone Summary</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {zoneSummaries.map(zone => (
+              <ZoneCard key={zone.zone} zone={zone} />
+            ))}
+          </div>
+        </div>
+
+        {/* Sector Table */}
+        <SectorTable sectors={sectors} />
+      </div>
+    </div>
+  );
+}
