@@ -9,10 +9,10 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 import { SECTORS, WATCHED_SECTORS, SectorData, HistoryPoint, ZoneSummary, ApiResponse } from '@/lib/types';
-import { fetchTicketData, CaptchaRequiredError } from '@/lib/api';
+import { fetchTicketData } from '@/lib/api';
 import { RefreshCw, AlertCircle } from 'lucide-react';
 
-const REFRESH_INTERVAL = 15000; // 15 seconds
+const REFRESH_INTERVAL = 60000; // 1 minute
 
 const ZONE_COLORS = {
   red: '#ef4444',
@@ -94,11 +94,7 @@ export default function Dashboard() {
       setLoading(false);
     } catch (err) {
       console.error('[v0] Failed to load ticket data:', err);
-      if (err instanceof CaptchaRequiredError) {
-        setError('eBilet API is rate limiting requests (captcha required). Start the Python backend: cd backend && pip install -r requirements.txt && python server.py');
-      } else {
-        setError('Failed to load ticket data. Please check CORS settings or use a proxy.');
-      }
+      setError('Failed to load ticket data. Please try again later.');
       setLoading(false);
     }
   }, [previousSectors, toast]);
