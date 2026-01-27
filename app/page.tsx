@@ -217,8 +217,8 @@ export default function Dashboard() {
           />
           <StatsCard
             title="Sellout Estimate"
-            value={selloutDate ? selloutDate.toLocaleDateString() : 'N/A'}
-            subtitle={selloutDate ? selloutDate.toLocaleTimeString() : 'Insufficient data'}
+            value={selloutDate ? `${String(selloutDate.getDate()).padStart(2, '0')}/${String(selloutDate.getMonth() + 1).padStart(2, '0')}/${selloutDate.getFullYear()}` : 'N/A'}
+            subtitle={selloutDate ? `${String(selloutDate.getHours()).padStart(2, '0')}:${String(selloutDate.getMinutes()).padStart(2, '0')}` : 'Insufficient data'}
           />
         </div>
 

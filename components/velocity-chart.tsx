@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { HistoryPoint } from '@/lib/types';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { RotateCcw } from 'lucide-react';
 
 interface VelocityChartProps {
@@ -49,11 +49,15 @@ export function VelocityChart({ history }: VelocityChartProps) {
   const chartData = zoomedHistory.map(point => {
     const percentChange = ((point.totalAvailable - baselineTickets) / baselineTickets) * 100;
     const ticketsSoldFromStart = baselineTickets - point.totalAvailable;
+    const date = new Date(point.timestamp);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
     return {
-      time: new Date(point.timestamp).toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit'
-      }),
+      time: `${hours}:${minutes}`,
+      fullDate: `${day}-${month}-${year} ${hours}:${minutes}`,
       tickets: point.totalAvailable,
       percentChange: percentChange,
       ticketsSold: ticketsSoldFromStart,
@@ -89,7 +93,7 @@ export function VelocityChart({ history }: VelocityChartProps) {
             <span className="text-muted-foreground">
               Sprzedano: <span className="text-foreground font-medium">{ticketsSold.toLocaleString('pl-PL')}</span>
             </span>
-            <span className={`font-medium ${totalChange < 0 ? 'text-red-500' : totalChange > 0 ? 'text-green-500' : 'text-muted-foreground'}`}>
+            <span className={`font-medium ${totalChange < 0 ? 'text-green-500' : totalChange > 0 ? 'text-red-500' : 'text-muted-foreground'}`}>
               {totalChange > 0 ? '+' : ''}{totalChange.toFixed(2)}%
             </span>
           </div>
@@ -151,7 +155,17 @@ export function VelocityChart({ history }: VelocityChartProps) {
 
         <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
+            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
+              <defs>
+                <linearGradient id="gradientGreen" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="gradientRed" x1="0" y1="1" x2="0" y2="0">
+                  <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                </linearGradient>
+              </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
               <XAxis
                 dataKey="time"
@@ -181,19 +195,19 @@ export function VelocityChart({ history }: VelocityChartProps) {
                   borderRadius: '8px',
                   padding: '12px'
                 }}
-                content={({ active, payload, label }) => {
+                content={({ active, payload }) => {
                   if (active && payload && payload.length) {
                     const data = payload[0].payload;
                     return (
                       <div className="bg-black/90 border border-white/20 rounded-lg p-3 text-sm">
-                        <p className="text-white/70 mb-2">{label}</p>
+                        <p className="text-white/70 mb-2">{data.fullDate}</p>
                         <p className="text-white">
                           Dostępne: <span className="font-medium">{data.tickets.toLocaleString('pl-PL')}</span>
                         </p>
-                        <p className={`${data.percentChange < 0 ? 'text-red-400' : data.percentChange > 0 ? 'text-green-400' : 'text-white/70'}`}>
+                        <p className={`${data.percentChange < 0 ? 'text-green-400' : data.percentChange > 0 ? 'text-red-400' : 'text-white/70'}`}>
                           Zmiana: <span className="font-medium">{data.percentChange > 0 ? '+' : ''}{data.percentChange.toFixed(2)}%</span>
                         </p>
-                        <p className="text-orange-400">
+                        <p className="text-green-400">
                           Sprzedano: <span className="font-medium">{data.ticketsSold.toLocaleString('pl-PL')}</span>
                         </p>
                       </div>
@@ -202,15 +216,16 @@ export function VelocityChart({ history }: VelocityChartProps) {
                   return null;
                 }}
               />
-              <Line
+              <Area
                 type="monotone"
                 dataKey="percentChange"
-                stroke="#ef4444"
+                stroke={totalChange <= 0 ? '#22c55e' : '#ef4444'}
                 strokeWidth={2}
-                dot={{ fill: '#ef4444', r: 3 }}
-                activeDot={{ r: 5, fill: '#ef4444' }}
+                fill={totalChange <= 0 ? 'url(#gradientGreen)' : 'url(#gradientRed)'}
+                dot={{ fill: totalChange <= 0 ? '#22c55e' : '#ef4444', r: 3 }}
+                activeDot={{ r: 5, fill: totalChange <= 0 ? '#22c55e' : '#ef4444' }}
               />
-            </LineChart>
+            </AreaChart>
           </ResponsiveContainer>
         </div>
 
