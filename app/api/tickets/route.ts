@@ -14,114 +14,83 @@ const API_PARAMS = {
   tid: '0'
 };
 
-// Map numeric API IDs to string sector IDs used in SECTORS
-const NUMERIC_TO_STRING_ID: Record<string, string> = {
-  "696": "218143106950759092", // D11
-  "697": "218143106950759093", // D14
-  "698": "218143106950759094", // D15
-  "699": "218143106950758960", // PŁYTA - GA
-  "560": "218143106950759095", // D16
-  "582": "218143106950759096", // D17
-  "595": "218143106950759097", // D20
-  "596": "218143106950759098", // V01
-  "597": "218143106950759099", // V02
-  "598": "218143106950759100", // V04
-  "583": "218143106950759101", // V05
-  "584": "218143106950758982", // V03
-  "585": "218143106950758983", // G34
-  "586": "218143106950758984", // G33
-  "701": "218143106950758985", // G32
-  "587": "218143106950758986", // G31
-  "588": "218143106950758987", // G26
-  "589": "218143106950758988", // G25
-  "590": "218143106950758989", // G24
-  "621": "218143106950758990", // G23
-  "599": "218143106950758995", // G27
-  "600": "218143106950758996", // G30
-  "601": "218143106950758997", // G29
-  "602": "218143106950758998", // G28
-  "606": "218143106950758999", // D13
-  "676": "218143106950759000", // D12
-  "677": "218143106950759001", // D18
-  "678": "218143106950759002", // D19
-  "679": "218143106950759006", // K4
-  "692": "218143106950759074", // G35
-  "693": "218143106950759075", // G36
-  "700": "218143106950759076", // G37
-  "682": "218143106950759077", // G1
-  "683": "218143106950759078", // G2
-  "685": "218143106950759079", // G3
-  "688": "218143106950759081", // G22
-  "689": "218143106950759082", // G21
-  "690": "218143106950759083", // G20
-  "686": "218143106950759085", // G18
-  "695": "218143106950759086", // G19
-  "681": "218143106950759088", // C01
-  "691": "218143106950759089", // C02
-  "674": "218143106950759090", // C03
-  "675": "218143106950759091", // C04
-  "694": "218143106950759021", // K2
-};
-
 export async function GET() {
   try {
-    // Build URL with query params - matching Python requests behavior
-    const url = new URL(API_URL);
-    for (const [key, value] of Object.entries(API_PARAMS)) {
-      url.searchParams.append(key, value);
+    const params = new URLSearchParams();
+    params.append('eid', API_PARAMS.eid);
+    params.append('sids', API_PARAMS.sids);
+    params.append('ec', API_PARAMS.ec);
+    params.append('exid', API_PARAMS.exid);
+    params.append('tid', API_PARAMS.tid);
+
+    const fullUrl = `${API_URL}?${params.toString()}`;
+
+    // Get cookie from environment variable (set in Vercel or .env.local)
+    const cookie = process.env.EBILET_COOKIE || '';
+
+    const headers: Record<string, string> = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept': 'application/json, text/plain, */*',
+      'Accept-Language': 'pl-PL,pl;q=0.9,en-US;q=0.8,en;q=0.7',
+    };
+
+    // Add cookie if available
+    if (cookie) {
+      headers['Cookie'] = `wdctx=${cookie}`;
+      console.log('[eBilet] Using cookie from env');
     }
 
-    // Add timeout like Python script (10 seconds)
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-    const response = await fetch(url.toString(), {
+    const response = await fetch(fullUrl, {
       method: 'GET',
       cache: 'no-store',
       signal: controller.signal,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-      },
+      headers,
     });
 
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      console.error('[eBilet] API error:', response.status, response.statusText);
-      throw new Error(`API returned status ${response.status}`);
+      const errorText = await response.text();
+
+      // Check if it's a captcha/rate limit response
+      if (response.status === 429 || errorText.includes('allegrocaptcha')) {
+        console.error('[eBilet] Rate limited or captcha required');
+        return NextResponse.json(
+          {
+            error: 'Captcha required. Set EBILET_COOKIE env variable with wdctx cookie value from browser.',
+            code: 'CAPTCHA_REQUIRED'
+          },
+          { status: 429 }
+        );
+      }
+
+      console.error('[eBilet] API error:', response.status, errorText.substring(0, 200));
+      return NextResponse.json(
+        { error: `API returned status ${response.status}` },
+        { status: response.status }
+      );
     }
 
     const data = await response.json();
-
-    // Debug: log raw response
-    console.log('[eBilet] Raw API response keys:', Object.keys(data));
-    console.log('[eBilet] sfc keys count:', Object.keys(data.sfc || {}).length);
-
-    // Convert numeric IDs to string IDs
-    const convertedSfc: Record<string, number> = {};
-    for (const [numericId, count] of Object.entries(data.sfc || {})) {
-      const stringId = NUMERIC_TO_STRING_ID[numericId];
-      if (stringId) {
-        convertedSfc[stringId] = count as number;
-      } else {
-        console.log('[eBilet] Unknown numeric ID:', numericId);
-      }
-    }
-
-    console.log('[eBilet] Converted sfc count:', Object.keys(convertedSfc).length);
+    console.log('[eBilet] Success! Got', Object.keys(data.sfc || {}).length, 'sectors');
 
     return NextResponse.json({
-      sfc: convertedSfc
+      sfc: data.sfc || {}
     });
+
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
-      console.error('[eBilet] Request timeout after 10 seconds');
+      console.error('[eBilet] Request timeout');
       return NextResponse.json(
         { error: 'Request timeout' },
         { status: 504 }
       );
     }
-    console.error('[eBilet] Error fetching from API:', error);
+
+    console.error('[eBilet] Error:', error);
     return NextResponse.json(
       { error: 'Failed to fetch ticket data' },
       { status: 500 }
