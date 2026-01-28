@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { StatsCard } from '@/components/stats-card';
 import { ZoneCard } from '@/components/zone-card';
 import { VelocityChart } from '@/components/velocity-chart';
+import { GAChart } from '@/components/ga-chart';
 import { SectorTable } from '@/components/sector-table';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -225,6 +226,11 @@ export default function Dashboard() {
         {/* Velocity Chart */}
         {history.length > 1 && (
           <VelocityChart history={history} />
+        )}
+
+        {/* GA Chart */}
+        {history.length > 1 && (
+          <GAChart history={history} />
         )}
 
         {/* Zone Cards */}

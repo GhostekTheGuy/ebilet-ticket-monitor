@@ -8,6 +8,7 @@ export interface SectorData {
 export interface HistoryPoint {
   timestamp: number;
   totalAvailable: number;
+  gaAvailable?: number;
 }
 
 export interface ZoneSummary {
@@ -83,3 +84,5 @@ export const SECTORS: Record<string, { name: string; zone: 'red' | 'yellow' | 'g
 };
 
 export const WATCHED_SECTORS = ['C01', 'C02', 'C03', 'C04', 'D15', 'D16', 'V05'];
+
+export const GA_SECTOR_ID = '218143106950758960';

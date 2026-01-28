@@ -1,5 +1,6 @@
 import { pool } from './db';
 import type { TicketSnapshot, HistoryPoint } from './types';
+import { GA_SECTOR_ID } from './types';
 
 export async function insertSnapshot(totalAvailable: number, rawData: Record<string, number>): Promise<void> {
   await pool.query(
@@ -16,8 +17,15 @@ export async function getHistory(hours: number = 24): Promise<HistoryPoint[]> {
      ORDER BY timestamp ASC`
   );
 
-  return result.rows.map(row => ({
-    timestamp: new Date(row.timestamp).getTime(),
-    totalAvailable: row.total_available,
-  }));
+  return result.rows.map(row => {
+    const rawData = typeof row.raw_data === 'string'
+      ? JSON.parse(row.raw_data)
+      : row.raw_data;
+
+    return {
+      timestamp: new Date(row.timestamp).getTime(),
+      totalAvailable: row.total_available,
+      gaAvailable: rawData?.[GA_SECTOR_ID] ?? undefined,
+    };
+  });
 }
