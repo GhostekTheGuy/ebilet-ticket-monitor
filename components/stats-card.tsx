@@ -11,7 +11,7 @@ interface StatsCardProps {
 
 export function StatsCard({ title, value, subtitle, trend, trendValue }: StatsCardProps) {
   return (
-    <Card className="relative overflow-hidden border-border/40 bg-card/50 backdrop-blur-xl p-6">
+    <Card className="relative overflow-hidden border-border/40 bg-card/50 backdrop-blur-xl shadow-sm p-6">
       <div className="space-y-2">
         <p className="text-sm font-medium text-muted-foreground">{title}</p>
         <div className="flex items-baseline gap-2">

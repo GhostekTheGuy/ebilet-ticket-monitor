@@ -12,7 +12,7 @@ export function ZoneCard({ zone }: ZoneCardProps) {
     : 0;
 
   return (
-    <Card className="relative overflow-hidden border-border/40 bg-card/50 backdrop-blur-xl p-6">
+    <Card className="relative overflow-hidden border-border/40 bg-card/50 backdrop-blur-xl shadow-sm p-6">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

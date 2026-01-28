@@ -19,7 +19,7 @@ export async function fetchTicketData(): Promise<ApiResponse> {
   }
 }
 
-export async function fetchHistory(hours: number = 24): Promise<HistoryResponse> {
+export async function fetchHistory(hours: number = 720): Promise<HistoryResponse> {
   try {
     const response = await fetch(`/api/history?hours=${hours}`, {
       cache: 'no-store',

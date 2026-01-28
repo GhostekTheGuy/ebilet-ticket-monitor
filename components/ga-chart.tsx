@@ -95,7 +95,7 @@ export function GAChart({ history }: GAChartProps) {
   }
 
   return (
-    <Card className="relative overflow-hidden border-border/40 bg-card/50 backdrop-blur-xl p-6">
+    <Card className="relative overflow-hidden border-border/40 bg-card/50 backdrop-blur-xl shadow-sm p-6">
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <h3 className="text-lg font-semibold text-foreground">

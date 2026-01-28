@@ -41,7 +41,7 @@ export default function Dashboard() {
 
   const loadHistory = useCallback(async () => {
     try {
-      const historyData = await fetchHistory(24);
+      const historyData = await fetchHistory();
       setHistory(historyData.history);
     } catch (err) {
       console.error('[v0] Failed to load history:', err);

@@ -9,7 +9,7 @@ export async function insertSnapshot(totalAvailable: number, rawData: Record<str
   );
 }
 
-export async function getHistory(hours: number = 24): Promise<HistoryPoint[]> {
+export async function getHistory(hours: number = 720): Promise<HistoryPoint[]> {
   const result = await pool.query<TicketSnapshot>(
     `SELECT id, timestamp, total_available, raw_data
      FROM ticket_snapshots

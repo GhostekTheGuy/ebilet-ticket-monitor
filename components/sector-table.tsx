@@ -73,7 +73,7 @@ export function SectorTable({ sectors }: SectorTableProps) {
   };
 
   return (
-    <Card className="relative overflow-hidden border-border/40 bg-card/50 backdrop-blur-xl">
+    <Card className="relative overflow-hidden border-border/40 bg-card/50 backdrop-blur-xl shadow-sm">
       <div className="p-6">
         <h3 className="text-lg font-semibold text-foreground mb-4">Sector Details</h3>
       </div>

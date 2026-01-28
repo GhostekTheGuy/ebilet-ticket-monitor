@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const hours = parseInt(searchParams.get('hours') || '24', 10);
+    const hours = parseInt(searchParams.get('hours') || '720', 10);
 
     const history = await getHistory(hours);
 
