@@ -4,7 +4,8 @@
       "Bash(curl:*)",
       "Bash(python:*)",
       "Bash(pnpm add:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npm run build:*)"
     ]
   }
 }

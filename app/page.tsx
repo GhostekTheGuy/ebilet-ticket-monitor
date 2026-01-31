@@ -13,7 +13,7 @@ import { SECTORS, WATCHED_SECTORS, SectorData, HistoryPoint, ZoneSummary, ApiRes
 import { fetchTicketData, fetchHistory } from '@/lib/api';
 import { RefreshCw, AlertCircle } from 'lucide-react';
 
-const REFRESH_INTERVAL = 60000; // 1 minute
+const REFRESH_INTERVAL = 900000; // 15 minutes
 
 const ZONE_COLORS = {
   red: '#ef4444',
@@ -39,14 +39,25 @@ export default function Dashboard() {
   const [previousSectors, setPreviousSectors] = useState<Map<string, number>>(new Map());
   const { toast } = useToast();
 
-  const loadHistory = useCallback(async () => {
+  const loadHistory = useCallback(async (incremental: boolean = false) => {
     try {
-      const historyData = await fetchHistory();
-      setHistory(historyData.history);
+      // Get last timestamp for incremental fetch
+      const lastTimestamp = incremental && history.length > 0
+        ? history[history.length - 1].timestamp
+        : undefined;
+
+      const historyData = await fetchHistory(72, lastTimestamp);
+
+      if (incremental && lastTimestamp) {
+        // Append only new records
+        setHistory(prev => [...prev, ...historyData.history]);
+      } else {
+        setHistory(historyData.history);
+      }
     } catch (err) {
       console.error('[v0] Failed to load history:', err);
     }
-  }, []);
+  }, [history]);
 
   const loadData = useCallback(async () => {
     try {
@@ -89,8 +100,8 @@ export default function Dashboard() {
       });
       setPreviousSectors(newPreviousSectors);
 
-      // Reload history from database (includes the snapshot just saved)
-      await loadHistory();
+      // Reload history from database (incremental - only new records)
+      await loadHistory(true);
 
       setLastUpdate(Date.now());
       setLoading(false);
@@ -102,8 +113,8 @@ export default function Dashboard() {
   }, [previousSectors, toast, loadHistory]);
 
   useEffect(() => {
-    // Load history from database first, then current data
-    loadHistory().then(() => loadData());
+    // Load full history from database first, then current data
+    loadHistory(false).then(() => loadData());
 
     // Set up auto-refresh
     const interval = setInterval(loadData, REFRESH_INTERVAL);

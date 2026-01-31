@@ -79,11 +79,11 @@ export async function GET() {
     const sfc = data.sfc || {};
     console.log('[eBilet] Success! Got', Object.keys(sfc).length, 'sectors');
 
-    // Calculate total and save to database
+    // Calculate total and save to database (only if data changed)
     const totalAvailable = Object.values(sfc as Record<string, number>).reduce((sum, val) => sum + val, 0);
     try {
-      await insertSnapshot(totalAvailable, sfc);
-      console.log('[eBilet] Saved snapshot to database');
+      const saved = await insertSnapshot(totalAvailable, sfc);
+      console.log(saved ? '[eBilet] Saved snapshot to database' : '[eBilet] Skipped - no changes');
     } catch (dbError) {
       console.error('[eBilet] Failed to save to database:', dbError);
       // Continue even if database save fails
