@@ -113,31 +113,29 @@ export function SectorAccordion({ sectors }: SectorAccordionProps) {
               </CollapsibleTrigger>
 
               <CollapsibleContent>
-                <div className="px-6 pb-5">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
+                <div className="px-6 pb-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
                     {zoneSectors.map(sector => {
                       const status = getStatus(sector.available);
                       return (
                         <div
                           key={sector.id}
                           className={cn(
-                            "flex items-center justify-between p-3.5 rounded-2xl border transition-colors",
+                            "flex items-center justify-between px-3 py-2.5 rounded-xl border transition-colors",
                             sector.available === 0
                               ? "bg-[#1a0f0f] border-[#2e1515]"
-                              : "bg-[#191919] border-[#1e1e22] hover:bg-[#1f1f1f]"
+                              : "bg-[#141414] border-[#1e1e22] hover:bg-[#1a1a1a]"
                           )}
                         >
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-[13px] text-[#c8c8cc]">{sector.name}</span>
-                          </div>
-                          <div className="flex items-center gap-2.5">
+                          <span className="font-medium text-[13px] text-[#c8c8cc] truncate mr-3">{sector.name}</span>
+                          <div className="flex items-center gap-2 shrink-0">
                             <span className={cn(
-                              "font-semibold text-[13px]",
+                              "font-semibold text-[13px] tabular-nums",
                               sector.available === 0 ? "text-[#ef4444]" : "text-white"
                             )}>
                               {sector.available}
                             </span>
-                            <Badge variant={status.variant} className="text-[10px]">
+                            <Badge variant={status.variant} className="text-[10px] min-w-[70px] justify-center">
                               {status.label}
                             </Badge>
                           </div>

@@ -3,7 +3,6 @@
 import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,
-  BarChart3,
   Ticket,
   ShoppingCart,
   Settings,
@@ -18,7 +17,6 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { icon: LayoutDashboard, label: 'Przegląd', id: 'overview' },
-  { icon: BarChart3, label: 'Wykresy', id: 'charts' },
   { icon: Ticket, label: 'Sektory', id: 'sectors' },
   { icon: ShoppingCart, label: 'AleBilet', id: 'alebilet' },
 ];

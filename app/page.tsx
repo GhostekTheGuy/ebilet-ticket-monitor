@@ -1,16 +1,16 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
-import { VelocityChart } from '@/components/velocity-chart';
-import { GAChart } from '@/components/ga-chart';
-import { SectorAccordion } from '@/components/sector-accordion';
+import { useEffect, useState, useCallback } from 'react';
 import { Sidebar } from '@/components/sidebar';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 import { SECTORS, WATCHED_SECTORS, SectorData, HistoryPoint, ApiResponse, AleBiletEventData, AleBiletSoldTicket } from '@/lib/types';
 import { fetchTicketData, fetchHistory, fetchAleBiletData, fetchAleBiletSoldTickets } from '@/lib/api';
-import { AleBiletSold } from '@/components/alebilet-sold';
 import { RefreshCw, Search, Bell } from 'lucide-react';
+
+import { OverviewPage } from '@/components/pages/overview-page';
+import { SectorsPage } from '@/components/pages/sectors-page';
+import { AleBiletPage } from '@/components/pages/alebilet-page';
 
 const REFRESH_INTERVAL = 900000;
 
@@ -19,7 +19,6 @@ export default function Dashboard() {
   const [history, setHistory] = useState<HistoryPoint[]>([]);
   const [lastUpdate, setLastUpdate] = useState<number>(Date.now());
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [secondsSinceUpdate, setSecondsSinceUpdate] = useState(0);
   const [previousSectors, setPreviousSectors] = useState<Map<string, number>>(new Map());
   const [aleBiletEvents, setAleBiletEvents] = useState<AleBiletEventData[]>([]);
@@ -27,20 +26,8 @@ export default function Dashboard() {
   const [activeSection, setActiveSection] = useState('overview');
   const { toast } = useToast();
 
-  const overviewRef = useRef<HTMLElement>(null);
-  const chartsRef = useRef<HTMLElement>(null);
-  const sectorsRef = useRef<HTMLElement>(null);
-  const alebiletRef = useRef<HTMLElement>(null);
-
   const handleNavigate = (id: string) => {
     setActiveSection(id);
-    const refs: Record<string, React.RefObject<HTMLElement | null>> = {
-      overview: overviewRef,
-      charts: chartsRef,
-      sectors: sectorsRef,
-      alebilet: alebiletRef,
-    };
-    refs[id]?.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const loadHistory = useCallback(async (incremental: boolean = false) => {
@@ -84,7 +71,6 @@ export default function Dashboard() {
 
   const loadData = useCallback(async () => {
     try {
-      setError(null);
       const data: ApiResponse = await fetchTicketData();
 
       const sectorArray: SectorData[] = Object.entries(data.sfc)
@@ -128,7 +114,6 @@ export default function Dashboard() {
       setLoading(false);
     } catch (err) {
       console.error('[v0] Failed to load ticket data:', err);
-      setError('Failed to load ticket data. Please try again later.');
       setLoading(false);
     }
   }, [previousSectors, toast, loadHistory, loadAleBiletData]);
@@ -146,6 +131,7 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, [lastUpdate]);
 
+  // Computed values for overview
   const totalAvailable = sectors.reduce((sum, s) => sum + s.available, 0);
   const oneHourAgo = Date.now() - 3600000;
   const hourAgoPoint = history.find(h => h.timestamp >= oneHourAgo) || history[0];
@@ -171,16 +157,46 @@ export default function Dashboard() {
   const greeting = now.getHours() < 12 ? 'Dzień dobry' : now.getHours() < 18 ? 'Dzień dobry' : 'Dobry wieczór';
   const dateStr = now.toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' });
 
+  // Page titles for header
+  const pageTitles: Record<string, string> = {
+    overview: 'Przegląd',
+    sectors: 'Sektory',
+    alebilet: 'AleBilet',
+  };
+
   if (loading && sectors.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-4">
-          <RefreshCw className="h-8 w-8 animate-spin mx-auto text-violet-400" />
-          <p className="text-muted-foreground">Ładowanie danych...</p>
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto text-[#5b9bf5]" />
+          <p className="text-[#5a5a62]">Ładowanie danych...</p>
         </div>
       </div>
     );
   }
+
+  const renderPage = () => {
+    switch (activeSection) {
+      case 'overview':
+        return (
+          <OverviewPage
+            totalAvailable={totalAvailable}
+            ticketsSoldLastHour={ticketsSoldLastHour}
+            salesRate={salesRate}
+            selloutDate={selloutDate}
+            greeting={greeting}
+            dateStr={dateStr}
+            history={history}
+          />
+        );
+      case 'sectors':
+        return <SectorsPage sectors={sectors} />;
+      case 'alebilet':
+        return <AleBiletPage events={aleBiletEvents} soldTickets={aleBiletSoldTickets} />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -194,10 +210,15 @@ export default function Dashboard() {
         {/* Top Bar */}
         <header className="sticky top-0 z-30 h-16 border-b border-[#1a1a1d] bg-[#080808]/80 backdrop-blur-xl">
           <div className="flex h-full items-center justify-between px-6">
-            {/* Search */}
-            <div className="figma-btn hidden md:flex items-center gap-2 px-[18px] py-2.5 w-52">
-              <Search className="h-[15px] w-[15px] text-[#4a4a52]" />
-              <span className="text-[#4a4a52] text-[13px]">Szukaj</span>
+            {/* Page title on mobile, Search on desktop */}
+            <div className="flex items-center gap-4">
+              <h2 className="text-lg font-semibold text-white md:hidden">
+                {pageTitles[activeSection]}
+              </h2>
+              <div className="figma-btn hidden md:flex items-center gap-2 px-[18px] py-2.5 w-52">
+                <Search className="h-[15px] w-[15px] text-[#4a4a52]" />
+                <span className="text-[#4a4a52] text-[13px]">Szukaj</span>
+              </div>
             </div>
 
             {/* Right side */}
@@ -222,7 +243,7 @@ export default function Dashboard() {
                   </span>
                 )}
               </button>
-              <div className="figma-btn flex items-center gap-2.5 px-2.5 py-2 pr-3.5">
+              <div className="figma-btn hidden sm:flex items-center gap-2.5 px-2.5 py-2 pr-3.5">
                 <div className="h-[34px] w-[34px] rounded-[10px] bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-[13px] font-semibold text-white">
                   T
                 </div>
@@ -236,88 +257,8 @@ export default function Dashboard() {
         </header>
 
         {/* Page Content */}
-        <div className="p-6 lg:p-7 space-y-5">
-          {/* Hero Overview */}
-          <section ref={overviewRef} className="animate-fade-up py-4 lg:py-8">
-            <p className="text-sm lg:text-base text-[#8a8a92] font-medium capitalize mb-1">{dateStr}</p>
-            <h1 className="text-2xl lg:text-3xl font-bold tracking-[-0.02em] text-white mb-8 lg:mb-12">{greeting}</h1>
-
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-0">
-              <div className="lg:pr-10 xl:pr-16">
-                <p className="text-xs lg:text-sm text-[#8a8a92] mb-2">Dostępne bilety</p>
-                <div className="flex items-baseline gap-3">
-                  <span className="text-4xl lg:text-5xl xl:text-6xl font-bold text-[#5b9bf5] tracking-[-0.03em]">
-                    {totalAvailable.toLocaleString()}
-                  </span>
-                </div>
-              </div>
-
-              <div className="lg:border-l lg:border-[#1e1e22] lg:pl-10 xl:pl-16 lg:pr-10 xl:pr-16">
-                <p className="text-xs lg:text-sm text-[#8a8a92] mb-2">Sprzedano (1h)</p>
-                <span className="text-4xl lg:text-5xl xl:text-6xl font-bold text-white tracking-[-0.03em]">
-                  {ticketsSoldLastHour.toLocaleString()}
-                </span>
-              </div>
-
-              <div className="lg:border-l lg:border-[#1e1e22] lg:pl-10 xl:pl-16 lg:pr-10 xl:pr-16">
-                <p className="text-xs lg:text-sm text-[#8a8a92] mb-2">Tempo sprzedaży</p>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl lg:text-5xl xl:text-6xl font-bold text-white tracking-[-0.03em]">
-                    {salesRate.toFixed(1)}
-                  </span>
-                  <span className="text-lg lg:text-xl xl:text-2xl text-[#5a5a62] font-normal">/min</span>
-                </div>
-              </div>
-
-              <div className="lg:border-l lg:border-[#1e1e22] lg:pl-10 xl:pl-16">
-                <p className="text-xs lg:text-sm text-[#8a8a92] mb-2">Przewidywane wyprzedanie</p>
-                <div className="flex items-baseline gap-2">
-                  {selloutDate ? (
-                    <>
-                      <span className="text-4xl lg:text-5xl xl:text-6xl font-bold text-white tracking-[-0.03em]">
-                        {String(selloutDate.getDate()).padStart(2, '0')}.{String(selloutDate.getMonth() + 1).padStart(2, '0')}
-                      </span>
-                      <span className="text-lg lg:text-xl xl:text-2xl text-[#5a5a62] font-normal">
-                        {String(selloutDate.getHours()).padStart(2, '0')}:{String(selloutDate.getMinutes()).padStart(2, '0')}
-                      </span>
-                    </>
-                  ) : (
-                    <span className="text-4xl lg:text-5xl xl:text-6xl font-bold text-[#5a5a62]">—</span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Charts */}
-          <section ref={chartsRef} className="animate-fade-up-delay-1">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-[16px] font-semibold text-white">Wykresy</h2>
-            </div>
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-              {history.length > 1 && <VelocityChart history={history} />}
-              {history.length > 1 && <GAChart history={history} />}
-            </div>
-          </section>
-
-          {/* Sector Accordion */}
-          <section ref={sectorsRef} className="animate-fade-up-delay-2">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-[16px] font-semibold text-white">Szczegóły sektorów</h2>
-            </div>
-            <SectorAccordion sectors={sectors} />
-          </section>
-
-          {/* AleBilet Section */}
-          <section ref={alebiletRef} className="animate-fade-up-delay-2">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-[16px] font-semibold text-white">AleBilet - Odsprzedaż</h2>
-            </div>
-            <AleBiletSold
-              events={aleBiletEvents}
-              allSoldTickets={aleBiletSoldTickets}
-            />
-          </section>
+        <div className="p-6 lg:p-7">
+          {renderPage()}
         </div>
       </main>
     </div>
