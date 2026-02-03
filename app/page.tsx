@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 import { SECTORS, WATCHED_SECTORS, SectorData, HistoryPoint, ApiResponse, AleBiletEventData, AleBiletSoldTicket } from '@/lib/types';
 import { fetchTicketData, fetchHistory, fetchAleBiletData, fetchAleBiletSoldTickets } from '@/lib/api';
-import { RefreshCw, Search, Bell } from 'lucide-react';
+import { RefreshCw, Search, Bell, Menu } from 'lucide-react';
 
 import { OverviewPage } from '@/components/pages/overview-page';
 import { SectorsPage } from '@/components/pages/sectors-page';
@@ -24,6 +24,7 @@ export default function Dashboard() {
   const [aleBiletEvents, setAleBiletEvents] = useState<AleBiletEventData[]>([]);
   const [aleBiletSoldTickets, setAleBiletSoldTickets] = useState<AleBiletSoldTicket[]>([]);
   const [activeSection, setActiveSection] = useState('overview');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { toast } = useToast();
 
   const handleNavigate = (id: string) => {
@@ -203,61 +204,66 @@ export default function Dashboard() {
       <Toaster />
 
       {/* Sidebar */}
-      <Sidebar activeSection={activeSection} onNavigate={handleNavigate} />
+      <Sidebar
+        activeSection={activeSection}
+        onNavigate={handleNavigate}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
 
       {/* Main Content */}
-      <main className="pl-16 lg:pl-56">
+      <main className="lg:pl-56">
         {/* Top Bar */}
-        <header className="sticky top-0 z-30 h-16 border-b border-[#1a1a1d] bg-[#080808]/80 backdrop-blur-xl">
-          <div className="flex h-full items-center justify-between px-6">
-            {/* Page title on mobile, Search on desktop */}
-            <div className="flex items-center gap-4">
-              <h2 className="text-lg font-semibold text-white md:hidden">
+        <header className="sticky top-0 z-30 h-14 border-b border-[#1a1a1d] bg-[#080808]/80 backdrop-blur-xl">
+          <div className="flex h-full items-center justify-between px-4 lg:px-6">
+            {/* Left side - Menu button on mobile, Search on desktop */}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden p-2 -ml-2 rounded-lg text-[#5a5a62] hover:text-white hover:bg-white/[0.04] transition-colors"
+              >
+                <Menu className="h-5 w-5" />
+              </button>
+              <h2 className="text-base font-semibold text-white lg:hidden">
                 {pageTitles[activeSection]}
               </h2>
-              <div className="figma-btn hidden md:flex items-center gap-2 px-[18px] py-2.5 w-52">
-                <Search className="h-[15px] w-[15px] text-[#4a4a52]" />
+              <div className="figma-btn hidden lg:flex items-center gap-2 px-4 py-2 w-48">
+                <Search className="h-4 w-4 text-[#4a4a52]" />
                 <span className="text-[#4a4a52] text-[13px]">Szukaj</span>
               </div>
             </div>
 
             {/* Right side */}
-            <div className="flex items-center gap-3.5 ml-auto">
-              <div className="figma-btn hidden sm:flex items-center gap-2 text-xs px-4 py-2">
-                <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[#8a8a92]">{secondsSinceUpdate}s temu</span>
+            <div className="flex items-center gap-2 lg:gap-3">
+              <div className="figma-btn hidden md:flex items-center gap-2 text-xs px-3 py-1.5">
+                <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[#8a8a92]">{secondsSinceUpdate}s</span>
               </div>
               <button
                 onClick={loadData}
-                className="figma-btn h-[34px] w-[34px] rounded-xl flex items-center justify-center text-[#5a5a62] hover:text-white"
+                className="figma-btn h-8 w-8 lg:h-9 lg:w-9 rounded-xl flex items-center justify-center text-[#5a5a62] hover:text-white"
               >
                 <RefreshCw className="h-4 w-4" />
               </button>
               <button
-                className="figma-btn h-[34px] w-[34px] rounded-xl flex items-center justify-center text-[#5a5a62] hover:text-white relative"
+                className="figma-btn h-8 w-8 lg:h-9 lg:w-9 rounded-xl flex items-center justify-center text-[#5a5a62] hover:text-white relative"
               >
                 <Bell className="h-4 w-4" />
                 {aleBiletSoldTickets.length > 0 && (
-                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-[#3b82f6] text-[10px] flex items-center justify-center font-semibold text-white">
+                  <span className="absolute -top-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-[#3b82f6] text-[9px] flex items-center justify-center font-semibold text-white">
                     {aleBiletSoldTickets.length}
                   </span>
                 )}
               </button>
-              <div className="figma-btn hidden sm:flex items-center gap-2.5 px-2.5 py-2 pr-3.5">
-                <div className="h-[34px] w-[34px] rounded-[10px] bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-[13px] font-semibold text-white">
-                  T
-                </div>
-                <div className="hidden lg:block">
-                  <div className="text-[13px] font-semibold text-white">Taco</div>
-                  <div className="text-[11px] text-[#5a5a62]">taco@dev.com</div>
-                </div>
+              <div className="hidden md:block h-8 w-8 lg:h-9 lg:w-9 rounded-lg bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-xs font-semibold text-white">
+                <span className="flex items-center justify-center h-full w-full">T</span>
               </div>
             </div>
           </div>
         </header>
 
         {/* Page Content */}
-        <div className="p-6 lg:p-7">
+        <div className="p-4 lg:p-6">
           {renderPage()}
         </div>
       </main>
