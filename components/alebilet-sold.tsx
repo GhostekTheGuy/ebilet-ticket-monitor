@@ -19,15 +19,15 @@ interface AleBiletSoldProps {
 }
 
 const EVENT_COLORS: Record<string, string> = {
-  '2026-05-22': '#3b82f6',
-  '2026-05-23': '#8b5cf6',
+  '2026-05-22': '#5b9bf5',
+  '2026-05-23': '#818cf8',
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
   'Strefa Czerwona': '#ef4444',
-  'Strefa Żółta': '#eab308',
-  'Strefa Zielona': '#22c55e',
-  'General Admission': '#3b82f6',
+  'Strefa Żółta': '#facc15',
+  'Strefa Zielona': '#4ade80',
+  'General Admission': '#5b9bf5',
 };
 
 function formatTime(timestamp: number): string {
@@ -71,43 +71,54 @@ function EventCard({ event }: { event: AleBiletEventData }) {
     ? Math.min(...event.tickets.map(t => t.price))
     : 0;
 
+  const eventColor = EVENT_COLORS[event.eventId] || '#6b7280';
+
   return (
-    <Card
-      className="border-l-4 p-6 bg-card/50 border-white/5"
-      style={{ borderLeftColor: EVENT_COLORS[event.eventId] || '#71717a' }}
-    >
-      <div className="flex items-center gap-2 text-base font-semibold mb-4">
-        <Calendar className="h-4 w-4" />
+    <Card className="p-6 relative overflow-hidden">
+      <div
+        className="absolute left-0 top-0 bottom-0 w-1"
+        style={{ backgroundColor: eventColor }}
+      />
+      <div className="flex items-center gap-2.5 text-[14px] font-semibold text-white mb-5">
+        <Calendar className="h-4 w-4 text-[#8a8a92]" />
         {event.eventName}
       </div>
-      <div className="grid grid-cols-2 gap-4 mb-3">
-        <div>
-          <div className="text-xl font-bold">{event.totalTickets}</div>
-          <div className="text-xs text-muted-foreground">biletów</div>
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="bg-[#191919] rounded-2xl p-3.5 border border-[#1e1e22]">
+          <div className="text-[11px] text-[#5a5a62] mb-1.5">Biletów</div>
+          <div className="text-[20px] font-bold text-white">{event.totalTickets}</div>
         </div>
-        <div>
-          <div className="text-xl font-bold">{event.tickets.length}</div>
-          <div className="text-xs text-muted-foreground">ofert</div>
+        <div className="bg-[#191919] rounded-2xl p-3.5 border border-[#1e1e22]">
+          <div className="text-[11px] text-[#5a5a62] mb-1.5">Ofert</div>
+          <div className="text-[20px] font-bold text-white">{event.tickets.length}</div>
         </div>
-        <div>
-          <div className="text-xl font-bold text-primary">
-            {event.soldTickets.length}
+        <div className="bg-[#191919] rounded-2xl p-3.5 border border-[#1e1e22]">
+          <div className="text-[11px] text-[#5a5a62] mb-1.5">Sprzedanych</div>
+          <div className="flex items-center gap-2">
+            <span className="text-[20px] font-bold text-white">{event.soldTickets.length}</span>
+            {event.soldTickets.length > 0 && (
+              <span className="bg-[#0c1a2e] text-[#7cb3f9] px-2 py-0.5 rounded-lg text-[10px] font-semibold">
+                Nowe
+              </span>
+            )}
           </div>
-          <div className="text-xs text-muted-foreground">sprzedanych</div>
         </div>
-        <div>
-          <div className="text-xl font-bold">
+        <div className="bg-[#191919] rounded-2xl p-3.5 border border-[#1e1e22]">
+          <div className="text-[11px] text-[#5a5a62] mb-1.5">Od</div>
+          <div className="text-[20px] font-bold text-white">
             {minPrice > 0 ? formatPrice(minPrice) : '-'}
           </div>
-          <div className="text-xs text-muted-foreground">od</div>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-1">
+      <div className="flex flex-wrap gap-1.5">
         {Object.entries(categorySummary).map(([name, data]) => (
-          <Badge key={name} variant="secondary" className="text-xs">
+          <span
+            key={name}
+            className="bg-[#191919] border border-[#1e1e22] rounded-lg px-2.5 py-1 text-[11px] text-[#8a8a92]"
+          >
             {name}: {data.count}
-          </Badge>
+          </span>
         ))}
       </div>
     </Card>
@@ -120,35 +131,42 @@ export function AleBiletSold({ events, allSoldTickets }: AleBiletSoldProps) {
   const totalSold = allSoldTickets.length;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Summary Card */}
-      <Card className="p-6 bg-card/50 border-white/5">
-        <div className="flex items-center gap-2 text-lg font-semibold mb-4">
-          <ShoppingCart className="h-5 w-5 text-primary" />
+      <Card className="p-6">
+        <div className="flex items-center gap-2.5 text-[16px] font-semibold text-white mb-5">
+          <ShoppingCart className="h-5 w-5 text-[#5b9bf5]" />
           AleBilet - Podsumowanie
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div>
-            <div className="text-2xl font-bold">{totalTickets}</div>
-            <div className="text-sm text-muted-foreground">wszystkich biletów</div>
+          <div className="bg-[#191919] rounded-2xl p-4 border border-[#1e1e22]">
+            <div className="text-[11px] text-[#5a5a62] mb-1.5">Wszystkich biletów</div>
+            <div className="text-[26px] font-bold text-white tracking-[-0.02em]">{totalTickets}</div>
           </div>
-          <div>
-            <div className="text-2xl font-bold">{totalOffers}</div>
-            <div className="text-sm text-muted-foreground">ofert łącznie</div>
+          <div className="bg-[#191919] rounded-2xl p-4 border border-[#1e1e22]">
+            <div className="text-[11px] text-[#5a5a62] mb-1.5">Ofert łącznie</div>
+            <div className="text-[26px] font-bold text-white tracking-[-0.02em]">{totalOffers}</div>
           </div>
-          <div>
-            <div className="text-2xl font-bold text-primary">{totalSold}</div>
-            <div className="text-sm text-muted-foreground">sprzedanych (24h)</div>
+          <div className="bg-[#191919] rounded-2xl p-4 border border-[#1e1e22]">
+            <div className="text-[11px] text-[#5a5a62] mb-1.5">Sprzedanych (24h)</div>
+            <div className="flex items-center gap-2.5">
+              <span className="text-[26px] font-bold text-white tracking-[-0.02em]">{totalSold}</span>
+              {totalSold > 0 && (
+                <span className="bg-[#052e1c] text-[#34d399] px-2.5 py-0.5 rounded-lg text-[10px] font-semibold">
+                  Aktywne
+                </span>
+              )}
+            </div>
           </div>
-          <div>
-            <div className="text-2xl font-bold">{events.length}</div>
-            <div className="text-sm text-muted-foreground">wydarzeń</div>
+          <div className="bg-[#191919] rounded-2xl p-4 border border-[#1e1e22]">
+            <div className="text-[11px] text-[#5a5a62] mb-1.5">Wydarzeń</div>
+            <div className="text-[26px] font-bold text-white tracking-[-0.02em]">{events.length}</div>
           </div>
         </div>
       </Card>
 
       {/* Event Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {events.map(event => (
           <EventCard key={event.eventId} event={event} />
         ))}
@@ -156,74 +174,74 @@ export function AleBiletSold({ events, allSoldTickets }: AleBiletSoldProps) {
 
       {/* Sold Tickets Table */}
       {allSoldTickets.length > 0 && (
-        <Card className="p-6 bg-card/50 border-white/5">
-          <div className="flex items-center gap-2 text-lg font-semibold mb-4">
-            <TrendingDown className="h-5 w-5 text-primary" />
-            Ostatnio sprzedane bilety (wszystkie wydarzenia)
+        <Card className="p-6">
+          <div className="flex items-center gap-2.5 text-[16px] font-semibold text-white mb-5">
+            <TrendingDown className="h-5 w-5 text-[#5b9bf5]" />
+            Ostatnio sprzedane bilety
           </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Data</TableHead>
-                <TableHead>Kategoria</TableHead>
-                <TableHead>Sektor</TableHead>
-                <TableHead>Rząd</TableHead>
-                <TableHead className="text-right">Ilość</TableHead>
-                <TableHead className="text-right">Cena</TableHead>
-                <TableHead className="text-right">Kiedy</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {allSoldTickets.map((ticket, index) => (
-                <TableRow key={`${ticket.id}-${index}`}>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className="text-xs"
-                      style={{
-                        borderColor: EVENT_COLORS[ticket.eventId] || '#71717a',
-                        color: EVENT_COLORS[ticket.eventId] || '#71717a'
-                      }}
-                    >
-                      {ticket.eventId === '2026-05-22' ? '22.05' : '23.05'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: CATEGORY_COLORS[ticket.category] || '#71717a' }}
-                      />
-                      <span className="text-sm">{ticket.categoryName}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="font-medium">{ticket.sector}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {ticket.row || '-'}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Badge variant="destructive" className="text-xs">
-                      -{ticket.soldQuantity || ticket.quantity}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right font-medium">
-                    {formatPrice(ticket.price)}
-                  </TableCell>
-                  <TableCell className="text-right text-sm text-muted-foreground">
-                    {formatTime(ticket.soldAt)}
-                  </TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-b border-[#1e1e22] hover:bg-transparent">
+                  <TableHead className="text-[11px] text-[#5a5a62] font-medium">Data</TableHead>
+                  <TableHead className="text-[11px] text-[#5a5a62] font-medium">Kategoria</TableHead>
+                  <TableHead className="text-[11px] text-[#5a5a62] font-medium">Sektor</TableHead>
+                  <TableHead className="text-[11px] text-[#5a5a62] font-medium">Rząd</TableHead>
+                  <TableHead className="text-[11px] text-[#5a5a62] font-medium text-right">Ilość</TableHead>
+                  <TableHead className="text-[11px] text-[#5a5a62] font-medium text-right">Cena</TableHead>
+                  <TableHead className="text-[11px] text-[#5a5a62] font-medium text-right">Kiedy</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {allSoldTickets.map((ticket, index) => (
+                  <TableRow key={`${ticket.id}-${index}`} className="border-b border-[#1e1e22] hover:bg-white/[0.02]">
+                    <TableCell className="py-3">
+                      <span
+                        className="px-2.5 py-1 rounded-lg text-[11px] font-medium border"
+                        style={{
+                          borderColor: EVENT_COLORS[ticket.eventId] || '#6b7280',
+                          color: EVENT_COLORS[ticket.eventId] || '#6b7280'
+                        }}
+                      >
+                        {ticket.eventId === '2026-05-22' ? '22.05' : '23.05'}
+                      </span>
+                    </TableCell>
+                    <TableCell className="py-3">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-2 h-2 rounded-full"
+                          style={{ backgroundColor: CATEGORY_COLORS[ticket.category] || '#6b7280' }}
+                        />
+                        <span className="text-[12px] text-[#c8c8cc]">{ticket.categoryName}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-3 text-[12px] font-medium text-white">{ticket.sector}</TableCell>
+                    <TableCell className="py-3 text-[12px] text-[#5a5a62]">
+                      {ticket.row || '-'}
+                    </TableCell>
+                    <TableCell className="py-3 text-right">
+                      <span className="bg-[#2e0c0c] text-[#ef4444] px-2 py-0.5 rounded-lg text-[11px] font-medium">
+                        -{ticket.soldQuantity || ticket.quantity}
+                      </span>
+                    </TableCell>
+                    <TableCell className="py-3 text-right text-[12px] font-semibold text-white">
+                      {formatPrice(ticket.price)}
+                    </TableCell>
+                    <TableCell className="py-3 text-right text-[11px] text-[#5a5a62]">
+                      {formatTime(ticket.soldAt)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </Card>
       )}
 
       {allSoldTickets.length === 0 && (
-        <Card className="py-8 text-center text-muted-foreground bg-card/50 border-white/5">
-          Brak sprzedanych biletów w ostatnich 24 godzinach.
-          <br />
-          <span className="text-sm">Dane aktualizują się przy każdym odświeżeniu strony.</span>
+        <Card className="py-10 text-center">
+          <p className="text-[14px] text-[#5a5a62]">Brak sprzedanych biletów w ostatnich 24 godzinach.</p>
+          <p className="text-[12px] text-[#4a4a52] mt-1">Dane aktualizują się przy każdym odświeżeniu strony.</p>
         </Card>
       )}
     </div>

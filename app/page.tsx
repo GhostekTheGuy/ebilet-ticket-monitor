@@ -5,8 +5,6 @@ import { VelocityChart } from '@/components/velocity-chart';
 import { GAChart } from '@/components/ga-chart';
 import { SectorAccordion } from '@/components/sector-accordion';
 import { Sidebar } from '@/components/sidebar';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 import { SECTORS, WATCHED_SECTORS, SectorData, HistoryPoint, ApiResponse, AleBiletEventData, AleBiletSoldTicket } from '@/lib/types';
@@ -194,114 +192,127 @@ export default function Dashboard() {
       {/* Main Content */}
       <main className="pl-16 lg:pl-56">
         {/* Top Bar */}
-        <header className="sticky top-0 z-30 h-16 border-b border-white/5 bg-background/80 backdrop-blur-xl">
+        <header className="sticky top-0 z-30 h-16 border-b border-[#1a1a1d] bg-[#080808]/80 backdrop-blur-xl">
           <div className="flex h-full items-center justify-between px-6">
             {/* Search */}
-            <div className="relative w-80 hidden md:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Szukaj..."
-                className="pl-9 bg-white/5 border-white/10 focus:border-violet-500/50"
-              />
+            <div className="figma-btn hidden md:flex items-center gap-2 px-[18px] py-2.5 w-52">
+              <Search className="h-[15px] w-[15px] text-[#4a4a52]" />
+              <span className="text-[#4a4a52] text-[13px]">Szukaj</span>
             </div>
 
             {/* Right side */}
-            <div className="flex items-center gap-3 ml-auto">
-              <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground px-3 py-1.5 rounded-lg bg-white/5">
-                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>{secondsSinceUpdate}s temu</span>
+            <div className="flex items-center gap-3.5 ml-auto">
+              <div className="figma-btn hidden sm:flex items-center gap-2 text-xs px-4 py-2">
+                <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[#8a8a92]">{secondsSinceUpdate}s temu</span>
               </div>
-              <Button
+              <button
                 onClick={loadData}
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 rounded-lg bg-white/5 hover:bg-white/10"
+                className="figma-btn h-[34px] w-[34px] rounded-xl flex items-center justify-center text-[#5a5a62] hover:text-white"
               >
                 <RefreshCw className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 rounded-lg bg-white/5 hover:bg-white/10 relative"
+              </button>
+              <button
+                className="figma-btn h-[34px] w-[34px] rounded-xl flex items-center justify-center text-[#5a5a62] hover:text-white relative"
               >
                 <Bell className="h-4 w-4" />
-                <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-violet-500 text-[10px] flex items-center justify-center font-medium">
-                  {aleBiletSoldTickets.length > 0 ? aleBiletSoldTickets.length : 0}
-                </span>
-              </Button>
-              <div className="h-9 w-9 rounded-full bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center text-sm font-medium">
-                T
+                {aleBiletSoldTickets.length > 0 && (
+                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-[#3b82f6] text-[10px] flex items-center justify-center font-semibold text-white">
+                    {aleBiletSoldTickets.length}
+                  </span>
+                )}
+              </button>
+              <div className="figma-btn flex items-center gap-2.5 px-2.5 py-2 pr-3.5">
+                <div className="h-[34px] w-[34px] rounded-[10px] bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-[13px] font-semibold text-white">
+                  T
+                </div>
+                <div className="hidden lg:block">
+                  <div className="text-[13px] font-semibold text-white">Taco</div>
+                  <div className="text-[11px] text-[#5a5a62]">taco@dev.com</div>
+                </div>
               </div>
             </div>
           </div>
         </header>
 
         {/* Page Content */}
-        <div className="p-6 space-y-8">
+        <div className="p-6 lg:p-7 space-y-5">
           {/* Hero Overview */}
-          <section ref={overviewRef} className="py-6 lg:py-10">
-            <p className="text-sm lg:text-base text-muted-foreground capitalize mb-1">{dateStr}</p>
-            <h1 className="text-2xl lg:text-3xl font-bold mb-8 lg:mb-12">{greeting},</h1>
+          <section ref={overviewRef} className="animate-fade-up py-4 lg:py-8">
+            <p className="text-sm lg:text-base text-[#8a8a92] font-medium capitalize mb-1">{dateStr}</p>
+            <h1 className="text-2xl lg:text-3xl font-bold tracking-[-0.02em] text-white mb-8 lg:mb-12">{greeting}</h1>
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-0">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-0">
               <div className="lg:pr-10 xl:pr-16">
-                <p className="text-xs lg:text-sm text-muted-foreground mb-2">Dostępne bilety</p>
-                <p className="text-4xl lg:text-5xl xl:text-6xl font-bold text-violet-400 tracking-tight">
-                  {totalAvailable.toLocaleString()}
-                </p>
+                <p className="text-xs lg:text-sm text-[#8a8a92] mb-2">Dostępne bilety</p>
+                <div className="flex items-baseline gap-3">
+                  <span className="text-4xl lg:text-5xl xl:text-6xl font-bold text-[#5b9bf5] tracking-[-0.03em]">
+                    {totalAvailable.toLocaleString()}
+                  </span>
+                </div>
               </div>
 
-              <div className="lg:border-l lg:border-white/10 lg:pl-10 xl:pl-16 lg:pr-10 xl:pr-16">
-                <p className="text-xs lg:text-sm text-muted-foreground mb-2">Sprzedano (1h)</p>
-                <p className="text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight">
+              <div className="lg:border-l lg:border-[#1e1e22] lg:pl-10 xl:pl-16 lg:pr-10 xl:pr-16">
+                <p className="text-xs lg:text-sm text-[#8a8a92] mb-2">Sprzedano (1h)</p>
+                <span className="text-4xl lg:text-5xl xl:text-6xl font-bold text-white tracking-[-0.03em]">
                   {ticketsSoldLastHour.toLocaleString()}
-                </p>
+                </span>
               </div>
 
-              <div className="lg:border-l lg:border-white/10 lg:pl-10 xl:pl-16 lg:pr-10 xl:pr-16">
-                <p className="text-xs lg:text-sm text-muted-foreground mb-2">Tempo sprzedaży</p>
-                <p className="text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight">
-                  {salesRate.toFixed(1)}
-                  <span className="text-lg lg:text-xl xl:text-2xl text-muted-foreground font-normal">/min</span>
-                </p>
+              <div className="lg:border-l lg:border-[#1e1e22] lg:pl-10 xl:pl-16 lg:pr-10 xl:pr-16">
+                <p className="text-xs lg:text-sm text-[#8a8a92] mb-2">Tempo sprzedaży</p>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-4xl lg:text-5xl xl:text-6xl font-bold text-white tracking-[-0.03em]">
+                    {salesRate.toFixed(1)}
+                  </span>
+                  <span className="text-lg lg:text-xl xl:text-2xl text-[#5a5a62] font-normal">/min</span>
+                </div>
               </div>
 
-              <div className="lg:border-l lg:border-white/10 lg:pl-10 xl:pl-16">
-                <p className="text-xs lg:text-sm text-muted-foreground mb-2">Przewidywane wyprzedanie</p>
-                <p className="text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight">
+              <div className="lg:border-l lg:border-[#1e1e22] lg:pl-10 xl:pl-16">
+                <p className="text-xs lg:text-sm text-[#8a8a92] mb-2">Przewidywane wyprzedanie</p>
+                <div className="flex items-baseline gap-2">
                   {selloutDate ? (
                     <>
-                      {String(selloutDate.getDate()).padStart(2, '0')}.{String(selloutDate.getMonth() + 1).padStart(2, '0')}
-                      <span className="text-lg lg:text-xl xl:text-2xl text-muted-foreground font-normal ml-2">
+                      <span className="text-4xl lg:text-5xl xl:text-6xl font-bold text-white tracking-[-0.03em]">
+                        {String(selloutDate.getDate()).padStart(2, '0')}.{String(selloutDate.getMonth() + 1).padStart(2, '0')}
+                      </span>
+                      <span className="text-lg lg:text-xl xl:text-2xl text-[#5a5a62] font-normal">
                         {String(selloutDate.getHours()).padStart(2, '0')}:{String(selloutDate.getMinutes()).padStart(2, '0')}
                       </span>
                     </>
                   ) : (
-                    <span className="text-muted-foreground">—</span>
+                    <span className="text-4xl lg:text-5xl xl:text-6xl font-bold text-[#5a5a62]">—</span>
                   )}
-                </p>
+                </div>
               </div>
             </div>
           </section>
 
           {/* Charts */}
-          <section ref={chartsRef}>
-            <h2 className="text-lg font-semibold mb-4">Wykresy</h2>
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+          <section ref={chartsRef} className="animate-fade-up-delay-1">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-[16px] font-semibold text-white">Wykresy</h2>
+            </div>
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
               {history.length > 1 && <VelocityChart history={history} />}
               {history.length > 1 && <GAChart history={history} />}
             </div>
           </section>
 
           {/* Sector Accordion */}
-          <section ref={sectorsRef}>
-            <h2 className="text-lg font-semibold mb-4">Szczegóły sektorów</h2>
+          <section ref={sectorsRef} className="animate-fade-up-delay-2">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-[16px] font-semibold text-white">Szczegóły sektorów</h2>
+            </div>
             <SectorAccordion sectors={sectors} />
           </section>
 
           {/* AleBilet Section */}
-          <section ref={alebiletRef}>
-            <h2 className="text-lg font-semibold mb-4">AleBilet - Odsprzedaż</h2>
+          <section ref={alebiletRef} className="animate-fade-up-delay-2">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-[16px] font-semibold text-white">AleBilet - Odsprzedaż</h2>
+            </div>
             <AleBiletSold
               events={aleBiletEvents}
               allSoldTickets={aleBiletSoldTickets}

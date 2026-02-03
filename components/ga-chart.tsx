@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { HistoryPoint } from '@/lib/types';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 
@@ -94,66 +93,84 @@ export function GAChart({ history }: GAChartProps) {
   }
 
   return (
-    <Card className="p-6 bg-card/50 border-white/5">
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+    <Card className="p-6">
+      <div className="space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-blue-500" />
-            <h3 className="text-lg font-semibold">General Admission (Płyta)</h3>
+            <div className="w-2.5 h-2.5 rounded-full bg-[#5b9bf5]" />
+            <h3 className="text-[16px] font-semibold text-white">General Admission (Płyta)</h3>
           </div>
-          <div className="flex items-center gap-4 text-sm">
-            <span className="text-muted-foreground">
-              Sprzedano: <span className="font-medium">{ticketsSold.toLocaleString('pl-PL')}</span>
+          <div className="flex items-center gap-3">
+            <span className="text-[#8a8a92] text-[12px]">
+              Sprzedano: <span className="font-semibold text-white">{ticketsSold.toLocaleString('pl-PL')}</span>
             </span>
-            <span className={`font-medium ${totalChange < 0 ? 'text-green-500' : totalChange > 0 ? 'text-red-500' : ''}`}>
+            <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
+              totalChange < 0
+                ? 'bg-[#052e1c] text-[#34d399]'
+                : totalChange > 0
+                  ? 'bg-[#2e0c0c] text-[#ef4444]'
+                  : 'bg-[#191919] text-[#8a8a92]'
+            }`}>
               {totalChange > 0 ? '+' : ''}{totalChange.toFixed(2)}%
             </span>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5">
           {(['1h', '6h', '12h', '24h', 'all'] as TimeRange[]).map((r) => (
-            <Button
+            <button
               key={r}
-              variant={timeRange === r ? 'default' : 'outline'}
-              size="sm"
               onClick={() => setTimeRange(r)}
+              className={`px-3.5 py-1.5 rounded-full text-[12px] font-medium transition-all ${
+                timeRange === r
+                  ? 'bg-white text-[#111]'
+                  : 'text-[#5a5a62] hover:text-white'
+              }`}
             >
               {r === 'all' ? 'Wszystko' : r}
-            </Button>
+            </button>
           ))}
         </div>
 
-        <div className="h-[300px] w-full">
+        <div className="h-[260px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
               <defs>
                 <linearGradient id="gradientBlue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#5b9bf5" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#5b9bf5" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis dataKey="time" className="text-xs" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.035)" vertical={false} />
+              <XAxis
+                dataKey="time"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#4a4a52', fontSize: 11 }}
+                dy={8}
+              />
               <YAxis
                 domain={[yMin, yMax]}
                 tickFormatter={(value) => `${value.toFixed(1)}%`}
-                className="text-xs"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#2e2e32', fontSize: 11 }}
                 width={50}
+                dx={-5}
               />
-              <ReferenceLine y={0} stroke="hsl(var(--muted-foreground))" strokeDasharray="3 3" />
+              <ReferenceLine y={0} stroke="#2e2e32" strokeDasharray="3 3" />
               <Tooltip
                 content={({ active, payload }) => {
                   if (active && payload && payload.length) {
                     const data = payload[0].payload;
                     return (
-                      <div className="bg-popover border rounded-lg p-3 text-sm shadow-lg">
-                        <p className="text-muted-foreground mb-2">{data.fullDate}</p>
-                        <p>Dostępne: <span className="font-medium">{data.tickets.toLocaleString('pl-PL')}</span></p>
-                        <p className={data.percentChange < 0 ? 'text-green-500' : data.percentChange > 0 ? 'text-red-500' : ''}>
+                      <div className="bg-[#1c1c1e] border border-[#252528] rounded-xl p-3 text-[12px] shadow-lg">
+                        <p className="text-[#5a5a62] mb-2">{data.fullDate}</p>
+                        <p className="text-[#c8c8cc]">Dostępne: <span className="font-semibold text-white">{data.tickets.toLocaleString('pl-PL')}</span></p>
+                        <p className={data.percentChange < 0 ? 'text-[#4ade80]' : data.percentChange > 0 ? 'text-[#ef4444]' : 'text-[#8a8a92]'}>
                           Zmiana: {data.percentChange > 0 ? '+' : ''}{data.percentChange.toFixed(2)}%
                         </p>
-                        <p className="text-blue-500">Sprzedano: {data.ticketsSold.toLocaleString('pl-PL')}</p>
+                        <p className="text-[#5b9bf5]">Sprzedano: {data.ticketsSold.toLocaleString('pl-PL')}</p>
                       </div>
                     );
                   }
@@ -163,7 +180,7 @@ export function GAChart({ history }: GAChartProps) {
               <Area
                 type="monotone"
                 dataKey="percentChange"
-                stroke="#3b82f6"
+                stroke="#5b9bf5"
                 strokeWidth={2}
                 fill="url(#gradientBlue)"
               />
@@ -171,7 +188,7 @@ export function GAChart({ history }: GAChartProps) {
           </ResponsiveContainer>
         </div>
 
-        <p className="text-xs text-muted-foreground text-center">
+        <p className="text-[11px] text-[#4a4a52] text-center">
           Zmiana od pierwszego punktu ({baselineTickets.toLocaleString('pl-PL')} biletów) | Punktów: {chartData.length}
         </p>
       </div>

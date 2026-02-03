@@ -14,9 +14,9 @@ interface SectorAccordionProps {
 
 const ZONE_CONFIG: Record<string, { name: string; color: string }> = {
   red: { name: 'Strefa Czerwona', color: '#ef4444' },
-  yellow: { name: 'Strefa Żółta', color: '#eab308' },
-  green: { name: 'Strefa Zielona', color: '#22c55e' },
-  ga: { name: 'General Admission', color: '#3b82f6' },
+  yellow: { name: 'Strefa Żółta', color: '#facc15' },
+  green: { name: 'Strefa Zielona', color: '#4ade80' },
+  ga: { name: 'General Admission', color: '#5b9bf5' },
 };
 
 const getStatus = (available: number) => {
@@ -58,14 +58,14 @@ export function SectorAccordion({ sectors }: SectorAccordionProps) {
   const soldOutSectors = sectors.filter(s => s.available === 0).length;
 
   return (
-    <Card className="bg-card/50 border-white/5 overflow-hidden">
-      <div className="p-4 border-b border-white/5">
-        <p className="text-sm text-muted-foreground">
+    <Card className="overflow-hidden">
+      <div className="px-6 py-4 border-b border-[#1e1e22]">
+        <p className="text-[13px] text-[#8a8a92]">
           {totalSectors} sektorów • {soldOutSectors} wyprzedanych
         </p>
       </div>
 
-      <div className="divide-y divide-white/5">
+      <div className="divide-y divide-[#1e1e22]">
         {Object.entries(ZONE_CONFIG).map(([zone, config]) => {
           const zoneSectors = sectorsByZone[zone] || [];
           if (zoneSectors.length === 0) return null;
@@ -81,30 +81,30 @@ export function SectorAccordion({ sectors }: SectorAccordionProps) {
               onOpenChange={() => toggleZone(zone)}
             >
               <CollapsibleTrigger className="w-full">
-                <div className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors cursor-pointer">
+                <div className="flex items-center justify-between px-6 py-4 hover:bg-white/[0.02] transition-colors cursor-pointer">
                   <div className="flex items-center gap-3">
                     <div
-                      className="h-3 w-3 rounded-full"
+                      className="h-[10px] w-[10px] rounded-full"
                       style={{ backgroundColor: config.color }}
                     />
-                    <span className="font-medium">{config.name}</span>
-                    <span className="text-sm text-muted-foreground">
+                    <span className="font-semibold text-[14px] text-white">{config.name}</span>
+                    <span className="text-[12px] text-[#5a5a62]">
                       ({zoneSectors.length} sektorów)
                     </span>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-right hidden sm:block">
-                      <span className="text-sm font-medium">{zoneAvailable.toLocaleString()}</span>
-                      <span className="text-sm text-muted-foreground ml-1">dostępnych</span>
+                      <span className="text-[13px] font-semibold text-white">{zoneAvailable.toLocaleString()}</span>
+                      <span className="text-[12px] text-[#5a5a62] ml-1.5">dostępnych</span>
                       {zoneSoldOut > 0 && (
-                        <span className="text-sm text-muted-foreground ml-2">
+                        <span className="text-[12px] text-[#5a5a62] ml-2">
                           • {zoneSoldOut} wyprzedanych
                         </span>
                       )}
                     </div>
                     <ChevronDown
                       className={cn(
-                        "h-5 w-5 text-muted-foreground transition-transform duration-300",
+                        "h-4 w-4 text-[#5a5a62] transition-transform duration-300",
                         isOpen && "rotate-180"
                       )}
                     />
@@ -113,31 +113,31 @@ export function SectorAccordion({ sectors }: SectorAccordionProps) {
               </CollapsibleTrigger>
 
               <CollapsibleContent>
-                <div className="px-4 pb-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+                <div className="px-6 pb-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
                     {zoneSectors.map(sector => {
                       const status = getStatus(sector.available);
                       return (
                         <div
                           key={sector.id}
                           className={cn(
-                            "flex items-center justify-between p-3 rounded-lg border transition-colors",
+                            "flex items-center justify-between p-3.5 rounded-2xl border transition-colors",
                             sector.available === 0
-                              ? "bg-red-500/5 border-red-500/20"
-                              : "bg-white/5 border-white/10 hover:bg-white/10"
+                              ? "bg-[#1a0f0f] border-[#2e1515]"
+                              : "bg-[#191919] border-[#1e1e22] hover:bg-[#1f1f1f]"
                           )}
                         >
                           <div className="flex items-center gap-2">
-                            <span className="font-medium text-sm">{sector.name}</span>
+                            <span className="font-medium text-[13px] text-[#c8c8cc]">{sector.name}</span>
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2.5">
                             <span className={cn(
-                              "font-semibold text-sm",
-                              sector.available === 0 && "text-red-400"
+                              "font-semibold text-[13px]",
+                              sector.available === 0 ? "text-[#ef4444]" : "text-white"
                             )}>
                               {sector.available}
                             </span>
-                            <Badge variant={status.variant} className="text-xs">
+                            <Badge variant={status.variant} className="text-[10px]">
                               {status.label}
                             </Badge>
                           </div>

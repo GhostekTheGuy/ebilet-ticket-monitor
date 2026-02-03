@@ -1,55 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(0.07 0.005 285);
-  --foreground: oklch(0.95 0 0);
-  --card: oklch(0.12 0.005 285);
-  --card-foreground: oklch(0.95 0 0);
-  --popover: oklch(0.12 0.005 285);
-  --popover-foreground: oklch(0.95 0 0);
-  --primary: oklch(0.55 0.2 285);
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.18 0.005 285);
-  --secondary-foreground: oklch(0.95 0 0);
-  --muted: oklch(0.18 0.005 285);
-  --muted-foreground: oklch(0.55 0 0);
-  --accent: oklch(0.55 0.2 285);
-  --accent-foreground: oklch(1 0 0);
-  --destructive: oklch(0.55 0.2 25);
-  --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.2 0.005 285);
-  --input: oklch(0.18 0.005 285);
-  --ring: oklch(0.55 0.2 285);
-  --radius: 0.75rem;
+  --background: #080808;
+  --foreground: #e4e4e7;
+  --card: #111113;
+  --card-foreground: #e4e4e7;
+  --popover: #111113;
+  --popover-foreground: #e4e4e7;
+  --primary: #5b9bf5;
+  --primary-foreground: #ffffff;
+  --secondary: #1c1c1e;
+  --secondary-foreground: #e4e4e7;
+  --muted: #191919;
+  --muted-foreground: #5a5a62;
+  --accent: #5b9bf5;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #1e1d21;
+  --input: #1c1c1e;
+  --ring: #5b9bf5;
+  --radius: 1rem;
+
+  /* Extended palette */
+  --text-primary: #ffffff;
+  --text-secondary: #8a8a92;
+  --text-tertiary: #5a5a62;
+  --text-quaternary: #4a4a52;
+  --success: #4ade80;
+  --warning: #facc15;
+  --sidebar-bg: #0c0c0e;
+  --card-border-start: #1e1d21;
+  --card-border-end: #282828;
 }
 
 .dark {
-  --background: oklch(0.07 0.005 285);
-  --foreground: oklch(0.95 0 0);
-  --card: oklch(0.12 0.005 285);
-  --card-foreground: oklch(0.95 0 0);
-  --popover: oklch(0.12 0.005 285);
-  --popover-foreground: oklch(0.95 0 0);
-  --primary: oklch(0.55 0.2 285);
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.18 0.005 285);
-  --secondary-foreground: oklch(0.95 0 0);
-  --muted: oklch(0.18 0.005 285);
-  --muted-foreground: oklch(0.55 0 0);
-  --accent: oklch(0.55 0.2 285);
-  --accent-foreground: oklch(1 0 0);
-  --destructive: oklch(0.55 0.2 25);
-  --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.2 0.005 285);
-  --input: oklch(0.18 0.005 285);
-  --ring: oklch(0.55 0.2 285);
+  --background: #080808;
+  --foreground: #e4e4e7;
+  --card: #111113;
+  --card-foreground: #e4e4e7;
+  --popover: #111113;
+  --popover-foreground: #e4e4e7;
+  --primary: #5b9bf5;
+  --primary-foreground: #ffffff;
+  --secondary: #1c1c1e;
+  --secondary-foreground: #e4e4e7;
+  --muted: #191919;
+  --muted-foreground: #5a5a62;
+  --accent: #5b9bf5;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #1e1d21;
+  --input: #1c1c1e;
+  --ring: #5b9bf5;
 }
 
 @theme inline {
-  --font-sans: 'Geist', 'Geist Fallback', system-ui, sans-serif;
+  --font-sans: var(--font-dm-sans), 'DM Sans', system-ui, sans-serif;
   --font-mono: 'Geist Mono', 'Geist Mono Fallback', monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -70,10 +82,10 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 0.5rem);
+  --radius-md: calc(var(--radius) - 0.25rem);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 0.25rem);
 }
 
 @layer base {
@@ -83,7 +95,74 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1c1c1e;
+    border-radius: 4px;
+  }
 }
+
+/* Figma Design System */
+
+/* Card with gradient border stroke */
+.figma-card {
+  background: var(--card);
+  border: none;
+  border-radius: 16px;
+  position: relative;
+  isolation: isolate;
+}
+
+.figma-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  padding: 1px;
+  background: linear-gradient(180deg, var(--card-border-start) 0%, var(--card-border-end) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Button with gradient fill and shine stroke */
+.figma-btn {
+  background: linear-gradient(160deg, #1c1c1e 0%, #141316 100%);
+  border: none;
+  border-radius: 18px;
+  position: relative;
+  isolation: isolate;
+  cursor: pointer;
+  color: #fff;
+  transition: all 0.2s ease;
+}
+
+.figma-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  padding: 1px;
+  background: linear-gradient(150deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.04) 40%, #141316 77%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.figma-btn:hover {
+  background: linear-gradient(160deg, #242426 0%, #1a181d 100%);
+}
+
 
 @keyframes collapsible-down {
   from {
@@ -107,11 +186,31 @@
   }
 }
 
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @layer utilities {
   .animate-collapsible-down {
     animation: collapsible-down 0.3s ease-out;
   }
   .animate-collapsible-up {
     animation: collapsible-up 0.3s ease-out;
+  }
+  .animate-fade-up {
+    animation: fadeUp 0.4s ease;
+  }
+  .animate-fade-up-delay-1 {
+    animation: fadeUp 0.5s ease;
+  }
+  .animate-fade-up-delay-2 {
+    animation: fadeUp 0.6s ease;
   }
 }
