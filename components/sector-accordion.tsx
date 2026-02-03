@@ -113,7 +113,7 @@ export function SectorAccordion({ sectors }: SectorAccordionProps) {
               </CollapsibleTrigger>
 
               <CollapsibleContent>
-                <div className="px-6 pb-4">
+                <div className="mx-6 mb-4 mt-1 pt-3 border-t border-[#1e1e22]/50">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
                     {zoneSectors.map(sector => {
                       const status = getStatus(sector.available);

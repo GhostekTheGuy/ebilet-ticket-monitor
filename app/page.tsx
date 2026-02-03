@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 import { SECTORS, WATCHED_SECTORS, SectorData, HistoryPoint, ApiResponse, AleBiletEventData, AleBiletSoldTicket } from '@/lib/types';
 import { fetchTicketData, fetchHistory, fetchAleBiletData, fetchAleBiletSoldTickets } from '@/lib/api';
-import { RefreshCw, Search, Bell, Menu } from 'lucide-react';
+import { RefreshCw, Search, Menu } from 'lucide-react';
 
 import { OverviewPage } from '@/components/pages/overview-page';
 import { SectorsPage } from '@/components/pages/sectors-page';
@@ -25,6 +25,7 @@ export default function Dashboard() {
   const [aleBiletSoldTickets, setAleBiletSoldTickets] = useState<AleBiletSoldTicket[]>([]);
   const [activeSection, setActiveSection] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const { toast } = useToast();
 
   const handleNavigate = (id: string) => {
@@ -71,6 +72,9 @@ export default function Dashboard() {
   }, [toast]);
 
   const loadData = useCallback(async () => {
+    setRefreshing(true);
+    const minAnimationTime = new Promise(resolve => setTimeout(resolve, 800));
+
     try {
       const data: ApiResponse = await fetchTicketData();
 
@@ -116,6 +120,9 @@ export default function Dashboard() {
     } catch (err) {
       console.error('[v0] Failed to load ticket data:', err);
       setLoading(false);
+    } finally {
+      await minAnimationTime;
+      setRefreshing(false);
     }
   }, [previousSectors, toast, loadHistory, loadAleBiletData]);
 
@@ -241,23 +248,16 @@ export default function Dashboard() {
               </div>
               <button
                 onClick={loadData}
-                className="figma-btn h-8 w-8 lg:h-9 lg:w-9 rounded-xl flex items-center justify-center text-[#5a5a62] hover:text-white"
+                disabled={refreshing}
+                className="figma-btn h-8 w-8 lg:h-9 lg:w-9 rounded-xl flex items-center justify-center text-[#5a5a62] hover:text-white disabled:opacity-50"
               >
-                <RefreshCw className="h-4 w-4" />
+                <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin-spring' : ''}`} />
               </button>
-              <button
-                className="figma-btn h-8 w-8 lg:h-9 lg:w-9 rounded-xl flex items-center justify-center text-[#5a5a62] hover:text-white relative"
-              >
-                <Bell className="h-4 w-4" />
-                {aleBiletSoldTickets.length > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-[#3b82f6] text-[9px] flex items-center justify-center font-semibold text-white">
-                    {aleBiletSoldTickets.length}
-                  </span>
-                )}
-              </button>
-              <div className="hidden md:block h-8 w-8 lg:h-9 lg:w-9 rounded-lg bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center text-xs font-semibold text-white">
-                <span className="flex items-center justify-center h-full w-full">T</span>
-              </div>
+              <img
+                src="https://img.wprost.pl/img/taco-hemingway-pokazal-filmy-z-dziecinstwa-nowy-singiel-z-dawidem-podsiadlo/a0/77/234be267720c314f0f4e37498c0a.webp"
+                alt="Profile"
+                className="hidden md:block h-8 w-8 lg:h-9 lg:w-9 rounded-lg object-cover"
+              />
             </div>
           </div>
         </header>

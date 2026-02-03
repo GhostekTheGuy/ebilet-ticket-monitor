@@ -1,7 +1,6 @@
 'use client';
 
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
@@ -11,7 +10,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import type { AleBiletSoldTicket, AleBiletEventData } from '@/lib/types';
-import { ShoppingCart, TrendingDown, Calendar } from 'lucide-react';
+import { TrendingDown } from 'lucide-react';
 
 interface AleBiletSoldProps {
   events: AleBiletEventData[];
@@ -73,14 +72,34 @@ function EventCard({ event }: { event: AleBiletEventData }) {
 
   const eventColor = EVENT_COLORS[event.eventId] || '#6b7280';
 
+  const dateLabel = event.eventId === '2026-05-22' ? '22 maja' : '23 maja';
+
   return (
     <Card className="p-6 relative overflow-hidden">
+      {/* Gradient glow background */}
       <div
-        className="absolute left-0 top-0 bottom-0 w-1"
-        style={{ backgroundColor: eventColor }}
+        className="absolute -top-20 -right-20 w-40 h-40 rounded-full blur-3xl opacity-20"
+        style={{ background: `radial-gradient(circle, ${eventColor} 0%, transparent 70%)` }}
       />
-      <div className="flex items-center gap-2.5 text-[14px] font-semibold text-white mb-5">
-        <Calendar className="h-4 w-4 text-[#8a8a92]" />
+
+      {/* Date badge */}
+      <div
+        className="absolute top-4 right-4 px-3 py-1.5 rounded-xl text-[11px] font-semibold tracking-wide"
+        style={{
+          background: `linear-gradient(135deg, ${eventColor}25 0%, ${eventColor}10 100%)`,
+          border: `1px solid ${eventColor}40`,
+          color: eventColor,
+          boxShadow: `0 0 20px ${eventColor}30, inset 0 1px 0 ${eventColor}20`
+        }}
+      >
+        {dateLabel}
+      </div>
+
+      <div className="flex items-center gap-2.5 text-[14px] font-semibold text-white mb-5 pr-20">
+        <div
+          className="w-2 h-2 rounded-full animate-pulse"
+          style={{ backgroundColor: eventColor, boxShadow: `0 0 8px ${eventColor}` }}
+        />
         {event.eventName}
       </div>
       <div className="grid grid-cols-2 gap-4 mb-4">
@@ -126,45 +145,8 @@ function EventCard({ event }: { event: AleBiletEventData }) {
 }
 
 export function AleBiletSold({ events, allSoldTickets }: AleBiletSoldProps) {
-  const totalTickets = events.reduce((sum, e) => sum + e.totalTickets, 0);
-  const totalOffers = events.reduce((sum, e) => sum + e.tickets.length, 0);
-  const totalSold = allSoldTickets.length;
-
   return (
     <div className="space-y-5">
-      {/* Summary Card */}
-      <Card className="p-6">
-        <div className="flex items-center gap-2.5 text-[16px] font-semibold text-white mb-5">
-          <ShoppingCart className="h-5 w-5 text-[#5b9bf5]" />
-          AleBilet - Podsumowanie
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-[#191919] rounded-2xl p-4 border border-[#1e1e22]">
-            <div className="text-[11px] text-[#5a5a62] mb-1.5">Wszystkich biletów</div>
-            <div className="text-[26px] font-bold text-white tracking-[-0.02em]">{totalTickets}</div>
-          </div>
-          <div className="bg-[#191919] rounded-2xl p-4 border border-[#1e1e22]">
-            <div className="text-[11px] text-[#5a5a62] mb-1.5">Ofert łącznie</div>
-            <div className="text-[26px] font-bold text-white tracking-[-0.02em]">{totalOffers}</div>
-          </div>
-          <div className="bg-[#191919] rounded-2xl p-4 border border-[#1e1e22]">
-            <div className="text-[11px] text-[#5a5a62] mb-1.5">Sprzedanych (24h)</div>
-            <div className="flex items-center gap-2.5">
-              <span className="text-[26px] font-bold text-white tracking-[-0.02em]">{totalSold}</span>
-              {totalSold > 0 && (
-                <span className="bg-[#052e1c] text-[#34d399] px-2.5 py-0.5 rounded-lg text-[10px] font-semibold">
-                  Aktywne
-                </span>
-              )}
-            </div>
-          </div>
-          <div className="bg-[#191919] rounded-2xl p-4 border border-[#1e1e22]">
-            <div className="text-[11px] text-[#5a5a62] mb-1.5">Wydarzeń</div>
-            <div className="text-[26px] font-bold text-white tracking-[-0.02em]">{events.length}</div>
-          </div>
-        </div>
-      </Card>
-
       {/* Event Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {events.map(event => (
@@ -197,10 +179,12 @@ export function AleBiletSold({ events, allSoldTickets }: AleBiletSoldProps) {
                   <TableRow key={`${ticket.id}-${index}`} className="border-b border-[#1e1e22] hover:bg-white/[0.02]">
                     <TableCell className="py-3">
                       <span
-                        className="px-2.5 py-1 rounded-lg text-[11px] font-medium border"
+                        className="px-2.5 py-1 rounded-lg text-[11px] font-medium border relative overflow-hidden"
                         style={{
                           borderColor: EVENT_COLORS[ticket.eventId] || '#6b7280',
-                          color: EVENT_COLORS[ticket.eventId] || '#6b7280'
+                          color: EVENT_COLORS[ticket.eventId] || '#6b7280',
+                          boxShadow: `0 0 12px ${EVENT_COLORS[ticket.eventId]}40`,
+                          background: `linear-gradient(135deg, ${EVENT_COLORS[ticket.eventId]}15 0%, transparent 50%)`
                         }}
                       >
                         {ticket.eventId === '2026-05-22' ? '22.05' : '23.05'}

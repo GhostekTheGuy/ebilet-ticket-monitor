@@ -197,6 +197,45 @@
   }
 }
 
+@keyframes spin-spring {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(200deg);
+  }
+  70% {
+    transform: rotate(340deg);
+  }
+  85% {
+    transform: rotate(370deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes wave-flow {
+  0% {
+    background-position: 0% 100%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
+}
+
+@keyframes wave-shimmer {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
 @layer utilities {
   .animate-collapsible-down {
     animation: collapsible-down 0.3s ease-out;
@@ -212,5 +251,44 @@
   }
   .animate-fade-up-delay-2 {
     animation: fadeUp 0.6s ease;
+  }
+  .animate-spin-spring {
+    animation: spin-spring 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+  }
+
+  .wave-indicator {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .wave-indicator::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      0deg,
+      transparent 0%,
+      currentColor 20%,
+      transparent 40%,
+      currentColor 60%,
+      transparent 80%,
+      currentColor 100%
+    );
+    background-size: 100% 200%;
+    animation: wave-flow 2s ease-in-out infinite;
+    opacity: 0.3;
+  }
+
+  .wave-indicator::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      currentColor 50%,
+      transparent 100%
+    );
+    animation: wave-shimmer 1.5s ease-in-out infinite;
   }
 }
