@@ -6,7 +6,10 @@
       "Bash(pnpm add:*)",
       "Bash(npx tsc:*)",
       "Bash(npm run build:*)",
-      "WebFetch(domain:www.alebilet.pl)"
+      "WebFetch(domain:www.alebilet.pl)",
+      "WebFetch(domain:ui.shadcn.com)",
+      "WebSearch",
+      "WebFetch(domain:cdn.dribbble.com)"
     ]
   }
 }

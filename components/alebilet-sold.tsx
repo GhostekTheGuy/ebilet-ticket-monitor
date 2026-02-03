@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
   Table,
@@ -18,18 +18,16 @@ interface AleBiletSoldProps {
   allSoldTickets: AleBiletSoldTicket[];
 }
 
-const CATEGORY_COLORS: Record<string, string> = {
-  cat01: 'bg-blue-500',
-  cat02: 'bg-green-500',
-  cat03: 'bg-purple-500',
-  cat07: 'bg-amber-500',
-  cat08: 'bg-rose-500',
-  cat10: 'bg-indigo-500',
+const EVENT_COLORS: Record<string, string> = {
+  '2026-05-22': '#3b82f6',
+  '2026-05-23': '#8b5cf6',
 };
 
-const EVENT_COLORS: Record<string, string> = {
-  '2026-05-22': 'border-l-blue-500',
-  '2026-05-23': 'border-l-green-500',
+const CATEGORY_COLORS: Record<string, string> = {
+  'Strefa Czerwona': '#ef4444',
+  'Strefa Żółta': '#eab308',
+  'Strefa Zielona': '#22c55e',
+  'General Admission': '#3b82f6',
 };
 
 function formatTime(timestamp: number): string {
@@ -74,45 +72,44 @@ function EventCard({ event }: { event: AleBiletEventData }) {
     : 0;
 
   return (
-    <Card className={`border-l-4 ${EVENT_COLORS[event.eventId] || 'border-l-gray-500'}`}>
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Calendar className="h-4 w-4" />
-          {event.eventName}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 gap-4 mb-3">
-          <div>
-            <div className="text-xl font-bold">{event.totalTickets}</div>
-            <div className="text-xs text-muted-foreground">biletów</div>
-          </div>
-          <div>
-            <div className="text-xl font-bold">{event.tickets.length}</div>
-            <div className="text-xs text-muted-foreground">ofert</div>
-          </div>
-          <div>
-            <div className="text-xl font-bold text-red-500">
-              {event.soldTickets.length}
-            </div>
-            <div className="text-xs text-muted-foreground">sprzedanych</div>
-          </div>
-          <div>
-            <div className="text-xl font-bold">
-              {minPrice > 0 ? formatPrice(minPrice) : '-'}
-            </div>
-            <div className="text-xs text-muted-foreground">od</div>
-          </div>
+    <Card
+      className="border-l-4 p-6 bg-card/50 border-white/5"
+      style={{ borderLeftColor: EVENT_COLORS[event.eventId] || '#71717a' }}
+    >
+      <div className="flex items-center gap-2 text-base font-semibold mb-4">
+        <Calendar className="h-4 w-4" />
+        {event.eventName}
+      </div>
+      <div className="grid grid-cols-2 gap-4 mb-3">
+        <div>
+          <div className="text-xl font-bold">{event.totalTickets}</div>
+          <div className="text-xs text-muted-foreground">biletów</div>
         </div>
+        <div>
+          <div className="text-xl font-bold">{event.tickets.length}</div>
+          <div className="text-xs text-muted-foreground">ofert</div>
+        </div>
+        <div>
+          <div className="text-xl font-bold text-primary">
+            {event.soldTickets.length}
+          </div>
+          <div className="text-xs text-muted-foreground">sprzedanych</div>
+        </div>
+        <div>
+          <div className="text-xl font-bold">
+            {minPrice > 0 ? formatPrice(minPrice) : '-'}
+          </div>
+          <div className="text-xs text-muted-foreground">od</div>
+        </div>
+      </div>
 
-        <div className="flex flex-wrap gap-1">
-          {Object.entries(categorySummary).map(([name, data]) => (
-            <Badge key={name} variant="secondary" className="text-xs">
-              {name}: {data.count}
-            </Badge>
-          ))}
-        </div>
-      </CardContent>
+      <div className="flex flex-wrap gap-1">
+        {Object.entries(categorySummary).map(([name, data]) => (
+          <Badge key={name} variant="secondary" className="text-xs">
+            {name}: {data.count}
+          </Badge>
+        ))}
+      </div>
     </Card>
   );
 }
@@ -125,33 +122,29 @@ export function AleBiletSold({ events, allSoldTickets }: AleBiletSoldProps) {
   return (
     <div className="space-y-6">
       {/* Summary Card */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <ShoppingCart className="h-5 w-5 text-pink-500" />
-            AleBilet - Podsumowanie
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-            <div>
-              <div className="text-2xl font-bold">{totalTickets}</div>
-              <div className="text-sm text-muted-foreground">wszystkich biletów</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold">{totalOffers}</div>
-              <div className="text-sm text-muted-foreground">ofert łącznie</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-red-500">{totalSold}</div>
-              <div className="text-sm text-muted-foreground">sprzedanych (24h)</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold">{events.length}</div>
-              <div className="text-sm text-muted-foreground">wydarzeń</div>
-            </div>
+      <Card className="p-6 bg-card/50 border-white/5">
+        <div className="flex items-center gap-2 text-lg font-semibold mb-4">
+          <ShoppingCart className="h-5 w-5 text-primary" />
+          AleBilet - Podsumowanie
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div>
+            <div className="text-2xl font-bold">{totalTickets}</div>
+            <div className="text-sm text-muted-foreground">wszystkich biletów</div>
           </div>
-        </CardContent>
+          <div>
+            <div className="text-2xl font-bold">{totalOffers}</div>
+            <div className="text-sm text-muted-foreground">ofert łącznie</div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-primary">{totalSold}</div>
+            <div className="text-sm text-muted-foreground">sprzedanych (24h)</div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold">{events.length}</div>
+            <div className="text-sm text-muted-foreground">wydarzeń</div>
+          </div>
+        </div>
       </Card>
 
       {/* Event Cards */}
@@ -163,77 +156,74 @@ export function AleBiletSold({ events, allSoldTickets }: AleBiletSoldProps) {
 
       {/* Sold Tickets Table */}
       {allSoldTickets.length > 0 && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <TrendingDown className="h-5 w-5 text-red-500" />
-              Ostatnio sprzedane bilety (wszystkie wydarzenia)
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Kategoria</TableHead>
-                  <TableHead>Sektor</TableHead>
-                  <TableHead>Rząd</TableHead>
-                  <TableHead className="text-right">Ilość</TableHead>
-                  <TableHead className="text-right">Cena</TableHead>
-                  <TableHead className="text-right">Kiedy</TableHead>
+        <Card className="p-6 bg-card/50 border-white/5">
+          <div className="flex items-center gap-2 text-lg font-semibold mb-4">
+            <TrendingDown className="h-5 w-5 text-primary" />
+            Ostatnio sprzedane bilety (wszystkie wydarzenia)
+          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Data</TableHead>
+                <TableHead>Kategoria</TableHead>
+                <TableHead>Sektor</TableHead>
+                <TableHead>Rząd</TableHead>
+                <TableHead className="text-right">Ilość</TableHead>
+                <TableHead className="text-right">Cena</TableHead>
+                <TableHead className="text-right">Kiedy</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {allSoldTickets.map((ticket, index) => (
+                <TableRow key={`${ticket.id}-${index}`}>
+                  <TableCell>
+                    <Badge
+                      variant="outline"
+                      className="text-xs"
+                      style={{
+                        borderColor: EVENT_COLORS[ticket.eventId] || '#71717a',
+                        color: EVENT_COLORS[ticket.eventId] || '#71717a'
+                      }}
+                    >
+                      {ticket.eventId === '2026-05-22' ? '22.05' : '23.05'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: CATEGORY_COLORS[ticket.category] || '#71717a' }}
+                      />
+                      <span className="text-sm">{ticket.categoryName}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="font-medium">{ticket.sector}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {ticket.row || '-'}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Badge variant="destructive" className="text-xs">
+                      -{ticket.soldQuantity || ticket.quantity}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right font-medium">
+                    {formatPrice(ticket.price)}
+                  </TableCell>
+                  <TableCell className="text-right text-sm text-muted-foreground">
+                    {formatTime(ticket.soldAt)}
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {allSoldTickets.map((ticket, index) => (
-                  <TableRow key={`${ticket.id}-${index}`}>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={`text-xs ${ticket.eventId === '2026-05-22' ? 'border-blue-500 text-blue-500' : 'border-green-500 text-green-500'}`}
-                      >
-                        {ticket.eventId === '2026-05-22' ? '22.05' : '23.05'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <div
-                          className={`w-2 h-2 rounded-full ${
-                            CATEGORY_COLORS[ticket.category] || 'bg-gray-500'
-                          }`}
-                        />
-                        <span className="text-sm">{ticket.categoryName}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-medium">{ticket.sector}</TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {ticket.row || '-'}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Badge variant="destructive" className="text-xs">
-                        -{ticket.soldQuantity || ticket.quantity}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right font-medium">
-                      {formatPrice(ticket.price)}
-                    </TableCell>
-                    <TableCell className="text-right text-sm text-muted-foreground">
-                      {formatTime(ticket.soldAt)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
+              ))}
+            </TableBody>
+          </Table>
         </Card>
       )}
 
       {allSoldTickets.length === 0 && (
-        <Card>
-          <CardContent className="py-8 text-center text-muted-foreground">
-            Brak sprzedanych biletów w ostatnich 24 godzinach.
-            <br />
-            <span className="text-sm">Dane aktualizują się przy każdym odświeżeniu strony.</span>
-          </CardContent>
+        <Card className="py-8 text-center text-muted-foreground bg-card/50 border-white/5">
+          Brak sprzedanych biletów w ostatnich 24 godzinach.
+          <br />
+          <span className="text-sm">Dane aktualizują się przy każdym odświeżeniu strony.</span>
         </Card>
       )}
     </div>

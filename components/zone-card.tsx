@@ -7,36 +7,26 @@ interface ZoneCardProps {
 }
 
 export function ZoneCard({ zone }: ZoneCardProps) {
-  const percentageAvailable = zone.totalSectors > 0 
-    ? ((zone.totalSectors - zone.soldOutSectors) / zone.totalSectors) * 100 
+  const percentageAvailable = zone.totalSectors > 0
+    ? ((zone.totalSectors - zone.soldOutSectors) / zone.totalSectors) * 100
     : 0;
 
   return (
-    <Card className="relative overflow-hidden border-border/40 bg-card/50 backdrop-blur-xl shadow-sm p-6">
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div 
-              className="h-3 w-3 rounded-full"
-              style={{ backgroundColor: zone.color }}
-            />
-            <h3 className="font-semibold text-foreground">{zone.name}</h3>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-foreground">{zone.totalAvailable}</span>
-            <span className="text-sm text-muted-foreground">available</span>
-          </div>
-          
-          <p className="text-xs text-muted-foreground">
-            {zone.soldOutSectors} / {zone.totalSectors} sectors sold out
-          </p>
-        </div>
-
-        <Progress value={percentageAvailable} className="h-2" />
+    <Card className="p-5 bg-card/50 border-white/5">
+      <div className="flex items-center gap-2 mb-4">
+        <div
+          className="h-2.5 w-2.5 rounded-full"
+          style={{ backgroundColor: zone.color }}
+        />
+        <span className="text-sm font-medium text-muted-foreground">{zone.name}</span>
       </div>
+
+      <p className="text-2xl font-bold mb-1">{zone.totalAvailable.toLocaleString()}</p>
+      <p className="text-xs text-muted-foreground mb-4">
+        {zone.soldOutSectors}/{zone.totalSectors} wyprzedanych
+      </p>
+
+      <Progress value={percentageAvailable} className="h-1.5" />
     </Card>
   );
 }
