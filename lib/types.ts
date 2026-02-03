@@ -86,3 +86,63 @@ export const SECTORS: Record<string, { name: string; zone: 'red' | 'yellow' | 'g
 export const WATCHED_SECTORS = ['C01', 'C02', 'C03', 'C04', 'D15', 'D16', 'V05'];
 
 export const GA_SECTOR_ID = '218143106950758960';
+
+// AleBilet types
+export interface AleBiletEvent {
+  id: string;
+  name: string;
+  date: string;
+  url: string;
+}
+
+export const ALEBILET_EVENTS: AleBiletEvent[] = [
+  {
+    id: '2026-05-22',
+    name: '22 maja 2026 (piątek)',
+    date: '2026-05-22',
+    url: 'https://www.alebilet.pl/bilety/taco_hemingway/2026-05-22/19:00/2026-our',
+  },
+  {
+    id: '2026-05-23',
+    name: '23 maja 2026 (sobota)',
+    date: '2026-05-23',
+    url: 'https://www.alebilet.pl/bilety/taco_hemingway/2026-05-23/19:00/2026-our',
+  },
+];
+
+export interface AleBiletTicket {
+  id: string; // unique identifier based on offer link
+  eventId: string; // which event this ticket belongs to
+  category: string; // cat01, cat02, cat03, cat07, cat08, cat10
+  categoryName: string; // e.g. "Trybuny Górne", "Płyta"
+  sector: string; // e.g. "G26", "plyta"
+  row: string | null;
+  quantity: number;
+  price: number;
+  buyLink: string;
+}
+
+export interface AleBiletSnapshot {
+  timestamp: number;
+  eventId: string;
+  tickets: AleBiletTicket[];
+  totalTickets: number;
+}
+
+export interface AleBiletSoldTicket extends AleBiletTicket {
+  soldAt: number;
+  previousQuantity?: number;
+  soldQuantity?: number;
+}
+
+export interface AleBiletEventData {
+  eventId: string;
+  eventName: string;
+  tickets: AleBiletTicket[];
+  totalTickets: number;
+  soldTickets: AleBiletSoldTicket[];
+}
+
+export interface AleBiletApiResponse {
+  events: AleBiletEventData[];
+}

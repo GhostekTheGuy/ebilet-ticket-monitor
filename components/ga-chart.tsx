@@ -13,6 +13,32 @@ interface GAChartProps {
 
 type TimeRange = '1h' | '6h' | '12h' | '24h' | 'all';
 
+const SAMPLE_INTERVAL_MS = 3 * 60 * 60 * 1000; // 3 hours in milliseconds
+
+// Sample data points at 3-hour intervals for "all" range
+function sampleDataPoints(data: HistoryPoint[]): HistoryPoint[] {
+  if (data.length <= 50) return data; // Don't sample if already small
+
+  const sampled: HistoryPoint[] = [];
+  let lastBucketTime = 0;
+
+  for (const point of data) {
+    const bucketTime = Math.floor(point.timestamp / SAMPLE_INTERVAL_MS) * SAMPLE_INTERVAL_MS;
+
+    if (bucketTime !== lastBucketTime) {
+      sampled.push(point);
+      lastBucketTime = bucketTime;
+    }
+  }
+
+  // Always include the last point
+  if (sampled.length > 0 && sampled[sampled.length - 1] !== data[data.length - 1]) {
+    sampled.push(data[data.length - 1]);
+  }
+
+  return sampled;
+}
+
 export function GAChart({ history }: GAChartProps) {
   const [timeRange, setTimeRange] = useState<TimeRange>('all');
   const [zoomRange, setZoomRange] = useState<[number, number]>([0, 100]);
@@ -24,7 +50,10 @@ export function GAChart({ history }: GAChartProps) {
 
   // Filter history based on time range
   const filteredHistory = useMemo(() => {
-    if (timeRange === 'all') return gaHistory;
+    if (timeRange === 'all') {
+      // Sample at 3-hour intervals for "all" range
+      return sampleDataPoints(gaHistory);
+    }
 
     const now = Date.now();
     const ranges: Record<TimeRange, number> = {

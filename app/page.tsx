@@ -9,8 +9,9 @@ import { SectorTable } from '@/components/sector-table';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
-import { SECTORS, WATCHED_SECTORS, SectorData, HistoryPoint, ZoneSummary, ApiResponse } from '@/lib/types';
-import { fetchTicketData, fetchHistory } from '@/lib/api';
+import { SECTORS, WATCHED_SECTORS, SectorData, HistoryPoint, ZoneSummary, ApiResponse, AleBiletEventData, AleBiletSoldTicket } from '@/lib/types';
+import { fetchTicketData, fetchHistory, fetchAleBiletData, fetchAleBiletSoldTickets } from '@/lib/api';
+import { AleBiletSold } from '@/components/alebilet-sold';
 import { RefreshCw, AlertCircle } from 'lucide-react';
 
 const REFRESH_INTERVAL = 900000; // 15 minutes
@@ -37,6 +38,8 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const [secondsSinceUpdate, setSecondsSinceUpdate] = useState(0);
   const [previousSectors, setPreviousSectors] = useState<Map<string, number>>(new Map());
+  const [aleBiletEvents, setAleBiletEvents] = useState<AleBiletEventData[]>([]);
+  const [aleBiletSoldTickets, setAleBiletSoldTickets] = useState<AleBiletSoldTicket[]>([]);
   const { toast } = useToast();
 
   const loadHistory = useCallback(async (incremental: boolean = false) => {
@@ -58,6 +61,30 @@ export default function Dashboard() {
       console.error('[v0] Failed to load history:', err);
     }
   }, [history]);
+
+  const loadAleBiletData = useCallback(async () => {
+    try {
+      const data = await fetchAleBiletData();
+      setAleBiletEvents(data.events);
+
+      // Count total newly sold tickets across all events
+      const totalNewlySold = data.events.reduce((sum, e) => sum + e.soldTickets.length, 0);
+
+      // Notify about newly sold tickets
+      if (totalNewlySold > 0) {
+        toast({
+          title: 'AleBilet - Sprzedano bilety!',
+          description: `${totalNewlySold} ofert zostało sprzedanych`,
+        });
+      }
+
+      // Fetch historical sold tickets (includes newly sold ones)
+      const soldData = await fetchAleBiletSoldTickets(24);
+      setAleBiletSoldTickets(soldData.soldTickets);
+    } catch (err) {
+      console.error('[AleBilet] Failed to load data:', err);
+    }
+  }, [toast]);
 
   const loadData = useCallback(async () => {
     try {
@@ -103,6 +130,9 @@ export default function Dashboard() {
       // Reload history from database (incremental - only new records)
       await loadHistory(true);
 
+      // Load AleBilet data
+      await loadAleBiletData();
+
       setLastUpdate(Date.now());
       setLoading(false);
     } catch (err) {
@@ -110,7 +140,7 @@ export default function Dashboard() {
       setError('Failed to load ticket data. Please try again later.');
       setLoading(false);
     }
-  }, [previousSectors, toast, loadHistory]);
+  }, [previousSectors, toast, loadHistory, loadAleBiletData]);
 
   useEffect(() => {
     // Load full history from database first, then current data
@@ -256,6 +286,15 @@ export default function Dashboard() {
 
         {/* Sector Table */}
         <SectorTable sectors={sectors} />
+
+        {/* AleBilet Section */}
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold text-foreground mb-4">AleBilet - Odsprzedaż</h2>
+          <AleBiletSold
+            events={aleBiletEvents}
+            allSoldTickets={aleBiletSoldTickets}
+          />
+        </div>
       </div>
     </div>
   );

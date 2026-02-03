@@ -1,4 +1,4 @@
-import type { ApiResponse, HistoryResponse } from './types';
+import type { ApiResponse, HistoryResponse, AleBiletApiResponse, AleBiletSoldTicket, AleBiletEventData } from './types';
 
 export async function fetchTicketData(): Promise<ApiResponse> {
   try {
@@ -39,6 +39,42 @@ export async function fetchHistory(hours: number = 72, sinceTimestamp?: number):
     return data;
   } catch (error) {
     console.error('[v0] Error fetching history:', error);
+    throw error;
+  }
+}
+
+export async function fetchAleBiletData(): Promise<AleBiletApiResponse> {
+  try {
+    const response = await fetch('/api/alebilet', {
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Failed to fetch AleBilet data');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('[AleBilet] Error fetching data:', error);
+    throw error;
+  }
+}
+
+export async function fetchAleBiletSoldTickets(hours: number = 24): Promise<{ soldTickets: AleBiletSoldTicket[] }> {
+  try {
+    const response = await fetch(`/api/alebilet/sold?hours=${hours}`, {
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Failed to fetch sold tickets');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('[AleBilet] Error fetching sold tickets:', error);
     throw error;
   }
 }
