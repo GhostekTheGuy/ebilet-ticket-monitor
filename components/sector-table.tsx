@@ -113,7 +113,7 @@ export function SectorTable({ sectors }: SectorTableProps) {
           <div className="border-t border-border/40">
             <div className="overflow-x-auto">
               <Table>
-                <TableHeader>
+                <TableHeader className={isOpen ? 'animate-header-in' : ''}>
                   <TableRow className="border-border/40 hover:bg-transparent">
                     <TableHead className="pl-6">
                       <button
@@ -151,9 +151,9 @@ export function SectorTable({ sectors }: SectorTableProps) {
                     return (
                       <TableRow
                         key={sector.id}
-                        className="border-border/40 transition-all duration-200 hover:bg-muted/50"
+                        className={`border-border/40 transition-all duration-200 hover:bg-muted/50 ${isOpen ? 'animate-row-in' : ''}`}
                         style={{
-                          animationDelay: `${index * 20}ms`,
+                          animationDelay: `${index * 30}ms`,
                         }}
                       >
                         <TableCell className="font-medium pl-6">{sector.name}</TableCell>
