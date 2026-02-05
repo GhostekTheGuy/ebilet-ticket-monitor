@@ -16,7 +16,7 @@ const ZONE_CONFIG: Record<string, { name: string; color: string }> = {
   red: { name: 'Strefa Czerwona', color: '#ef4444' },
   yellow: { name: 'Strefa Żółta', color: '#facc15' },
   green: { name: 'Strefa Zielona', color: '#4ade80' },
-  ga: { name: 'General Admission', color: '#5b9bf5' },
+  ga: { name: 'General Admission', color: 'var(--accent)' },
 };
 
 const getStatus = (available: number) => {

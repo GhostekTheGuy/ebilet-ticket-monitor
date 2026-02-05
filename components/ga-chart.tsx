@@ -97,7 +97,7 @@ export function GAChart({ history }: GAChartProps) {
       <div className="space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#5b9bf5]" />
+            <div className="w-2.5 h-2.5 rounded-full bg-[var(--accent)]" />
             <h3 className="text-[16px] font-semibold text-white">General Admission (Płyta)</h3>
           </div>
           <div className="flex items-center gap-3">
@@ -137,8 +137,8 @@ export function GAChart({ history }: GAChartProps) {
             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
               <defs>
                 <linearGradient id="gradientBlue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#5b9bf5" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#5b9bf5" stopOpacity={0} />
+                  <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="var(--accent)" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.035)" vertical={false} />
@@ -170,7 +170,7 @@ export function GAChart({ history }: GAChartProps) {
                         <p className={data.percentChange < 0 ? 'text-[#4ade80]' : data.percentChange > 0 ? 'text-[#ef4444]' : 'text-[#8a8a92]'}>
                           Zmiana: {data.percentChange > 0 ? '+' : ''}{data.percentChange.toFixed(2)}%
                         </p>
-                        <p className="text-[#5b9bf5]">Sprzedano: {data.ticketsSold.toLocaleString('pl-PL')}</p>
+                        <p className="text-[var(--accent)]">Sprzedano: {data.ticketsSold.toLocaleString('pl-PL')}</p>
                       </div>
                     );
                   }
@@ -180,7 +180,7 @@ export function GAChart({ history }: GAChartProps) {
               <Area
                 type="monotone"
                 dataKey="percentChange"
-                stroke="#5b9bf5"
+                stroke="var(--accent)"
                 strokeWidth={2}
                 fill="url(#gradientBlue)"
               />

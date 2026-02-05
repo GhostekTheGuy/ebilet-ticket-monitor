@@ -18,7 +18,7 @@ interface AleBiletSoldProps {
 }
 
 const EVENT_COLORS: Record<string, string> = {
-  '2026-05-22': '#5b9bf5',
+  '2026-05-22': 'var(--accent)',
   '2026-05-23': '#818cf8',
 };
 
@@ -26,7 +26,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   'Strefa Czerwona': '#ef4444',
   'Strefa Żółta': '#facc15',
   'Strefa Zielona': '#4ade80',
-  'General Admission': '#5b9bf5',
+  'General Admission': 'var(--accent)',
 };
 
 function formatTime(timestamp: number): string {
@@ -158,7 +158,7 @@ export function AleBiletSold({ events, allSoldTickets }: AleBiletSoldProps) {
       {allSoldTickets.length > 0 && (
         <Card className="p-6">
           <div className="flex items-center gap-2.5 text-[16px] font-semibold text-white mb-5">
-            <TrendingDown className="h-5 w-5 text-[#5b9bf5]" />
+            <TrendingDown className="h-5 w-5 text-[var(--accent)]" />
             Ostatnio sprzedane bilety
           </div>
           <div className="overflow-x-auto">

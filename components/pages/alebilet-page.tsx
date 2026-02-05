@@ -30,7 +30,7 @@ export function AleBiletPage({ events, soldTickets }: AleBiletPageProps) {
           <div className="lg:pr-10 xl:pr-16">
             <p className="text-xs lg:text-sm text-[#8a8a92] mb-2">Dostępne bilety</p>
             <div className="flex items-baseline gap-3">
-              <span className="text-4xl lg:text-5xl xl:text-6xl font-bold text-[#5b9bf5] tracking-[-0.03em]">
+              <span className="text-4xl lg:text-5xl xl:text-6xl font-bold text-[var(--accent)] tracking-[-0.03em]">
                 {totalTickets.toLocaleString()}
               </span>
             </div>

@@ -1,16 +1,18 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Sidebar } from '@/components/sidebar';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 import { SECTORS, WATCHED_SECTORS, SectorData, HistoryPoint, ApiResponse, AleBiletEventData, AleBiletSoldTicket } from '@/lib/types';
 import { fetchTicketData, fetchHistory, fetchAleBiletData, fetchAleBiletSoldTickets } from '@/lib/api';
 import { RefreshCw, Search, Menu } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { OverviewPage } from '@/components/pages/overview-page';
 import { SectorsPage } from '@/components/pages/sectors-page';
 import { AleBiletPage } from '@/components/pages/alebilet-page';
+import { SettingsPage, initAccentColor } from '@/components/pages/settings-page';
 
 const REFRESH_INTERVAL = 900000;
 
@@ -26,7 +28,19 @@ export default function Dashboard() {
   const [activeSection, setActiveSection] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [searchFocused, setSearchFocused] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setSearchFocused(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleNavigate = (id: string) => {
     setActiveSection(id);
@@ -127,6 +141,7 @@ export default function Dashboard() {
   }, [previousSectors, toast, loadHistory, loadAleBiletData]);
 
   useEffect(() => {
+    initAccentColor();
     loadHistory(false).then(() => loadData());
     const interval = setInterval(loadData, REFRESH_INTERVAL);
     return () => clearInterval(interval);
@@ -170,13 +185,14 @@ export default function Dashboard() {
     overview: 'Przegląd',
     sectors: 'Sektory',
     alebilet: 'AleBilet',
+    settings: 'Ustawienia',
   };
 
   if (loading && sectors.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-4">
-          <RefreshCw className="h-8 w-8 animate-spin mx-auto text-[#5b9bf5]" />
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto text-[var(--accent)]" />
           <p className="text-[#5a5a62]">Ładowanie danych...</p>
         </div>
       </div>
@@ -201,6 +217,8 @@ export default function Dashboard() {
         return <SectorsPage sectors={sectors} />;
       case 'alebilet':
         return <AleBiletPage events={aleBiletEvents} soldTickets={aleBiletSoldTickets} />;
+      case 'settings':
+        return <SettingsPage />;
       default:
         return null;
     }
@@ -234,9 +252,60 @@ export default function Dashboard() {
               <h2 className="text-base font-semibold text-white lg:hidden">
                 {pageTitles[activeSection]}
               </h2>
-              <div className="figma-btn hidden lg:flex items-center gap-2 px-4 py-2 w-48">
-                <Search className="h-4 w-4 text-[#4a4a52]" />
-                <span className="text-[#4a4a52] text-[13px]">Szukaj</span>
+              <div className="hidden lg:block relative" ref={searchRef}>
+                <motion.div
+                  className="figma-btn flex items-center gap-2 px-4 py-2 w-48 cursor-pointer relative overflow-hidden"
+                  onClick={() => setSearchFocused(!searchFocused)}
+                  animate={{
+                    borderColor: searchFocused ? 'rgba(239, 68, 68, 0.6)' : 'rgba(255,255,255,0.06)',
+                    boxShadow: searchFocused
+                      ? '0 0 20px rgba(239, 68, 68, 0.3), 0 0 60px rgba(239, 68, 68, 0.1), inset 0 0 20px rgba(239, 68, 68, 0.05)'
+                      : '0 0 0px rgba(239, 68, 68, 0)',
+                  }}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                  style={{ border: '1px solid' }}
+                >
+                  <motion.div
+                    animate={{ rotate: searchFocused ? [0, -10, 10, -10, 0] : 0 }}
+                    transition={{ duration: 0.5, ease: 'easeInOut' }}
+                  >
+                    <Search className={`h-4 w-4 transition-colors duration-300 ${searchFocused ? 'text-red-500' : 'text-[#4a4a52]'}`} />
+                  </motion.div>
+                  <span className={`text-[13px] transition-colors duration-300 ${searchFocused ? 'text-red-400' : 'text-[#4a4a52]'}`}>Szukaj</span>
+                </motion.div>
+
+                <AnimatePresence>
+                  {searchFocused && (
+                    <motion.div
+                      className="absolute top-full left-0 mt-2 z-50"
+                      initial={{ opacity: 0, scale: 0.3, y: -20, rotate: -15 }}
+                      animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
+                      exit={{ opacity: 0, scale: 0.5, y: -10, rotate: 10 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                    >
+                      <motion.div
+                        className="rounded-xl overflow-hidden shadow-2xl"
+                        style={{ boxShadow: '0 0 40px rgba(239, 68, 68, 0.3)' }}
+                        animate={{ rotate: [0, 2, -2, 1, 0] }}
+                        transition={{ duration: 2, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
+                      >
+                        <img
+                          src="https://toppng.com/uploads/preview/troll-face-meme-png-troll-meme-face-11562876701qtjzp7o6nr.png"
+                          alt="troll"
+                          className="w-32 h-32 object-contain bg-white rounded-xl p-1"
+                        />
+                      </motion.div>
+                      <motion.p
+                        className="text-red-400 text-xs text-center mt-2 font-medium"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: [0, 1, 0.7, 1] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                      >
+                        nie ma szukaj xD
+                      </motion.p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
 

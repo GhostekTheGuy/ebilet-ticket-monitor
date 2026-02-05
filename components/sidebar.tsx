@@ -6,7 +6,6 @@ import {
   Ticket,
   ShoppingCart,
   Settings,
-  HelpCircle,
   X
 } from 'lucide-react';
 
@@ -24,7 +23,6 @@ const navItems: NavItem[] = [
 
 const bottomItems: NavItem[] = [
   { icon: Settings, label: 'Ustawienia', id: 'settings' },
-  { icon: HelpCircle, label: 'Pomoc', id: 'help' },
 ];
 
 interface SidebarProps {
@@ -99,15 +97,24 @@ export function Sidebar({ activeSection = 'overview', onNavigate, isOpen = false
 
         {/* Bottom */}
         <div className="py-3 px-2 border-t border-[#1a1a1d] flex flex-col gap-0.5">
-          {bottomItems.map((item) => (
-            <button
-              key={item.id}
-              className="flex items-center gap-3 h-11 px-3 rounded-lg text-[#4a4a52] hover:text-white hover:bg-white/[0.04] transition-colors"
-            >
-              <item.icon className="h-5 w-5 shrink-0" strokeWidth={1.8} />
-              <span className="text-sm font-medium">{item.label}</span>
-            </button>
-          ))}
+          {bottomItems.map((item) => {
+            const isActive = activeSection === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleNavigate(item.id)}
+                className={cn(
+                  "flex items-center gap-3 h-11 px-3 rounded-lg transition-colors",
+                  isActive
+                    ? "bg-white/[0.08] text-white"
+                    : "text-[#4a4a52] hover:text-white hover:bg-white/[0.04]"
+                )}
+              >
+                <item.icon className="h-5 w-5 shrink-0" strokeWidth={1.8} />
+                <span className="text-sm font-medium">{item.label}</span>
+              </button>
+            );
+          })}
         </div>
       </aside>
     </>
