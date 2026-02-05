@@ -2,8 +2,6 @@
 
 Real-time dashboard for monitoring concert ticket availability across primary and secondary markets. Built with **Next.js 16**, **TypeScript**, and **PostgreSQL**.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/zioms-projects-68524e26/v0-ebilet-ticket-monitor)
-
 ## Features
 
 - **Live Ticket Tracking** — monitors 43+ sectors on eBilet.pl in real-time, with automatic snapshot storage when availability changes
@@ -22,9 +20,10 @@ Real-time dashboard for monitoring concert ticket availability across primary an
 | Language | TypeScript (strict mode) |
 | UI | Tailwind CSS 4, Radix UI, Lucide Icons |
 | Charts | Recharts |
+| Animation | Framer Motion |
 | Database | PostgreSQL (Neon serverless) |
-| Forms | React Hook Form + Zod validation |
-| Deployment | Vercel (with cron jobs) |
+| Testing | Vitest |
+| Deployment | Vercel |
 
 ## Architecture
 
@@ -48,10 +47,12 @@ components/
 └── ui/                → 12+ Radix-based primitives
 
 lib/
+├── analytics.ts       → Shared analytics logic (sampling, sold detection, metrics)
 ├── types.ts           → Shared TypeScript type definitions
 ├── api.ts             → Client-side API fetch functions
 ├── db.ts              → Neon connection pool
-└── db-queries.ts      → SQL query layer
+├── db-queries.ts      → SQL query layer
+└── __tests__/         → Unit tests
 ```
 
 ## How It Works
@@ -76,14 +77,23 @@ Three tables in Neon PostgreSQL:
 
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
 # Set environment variables
 cp .env.example .env.local
-# Required: NEON_DATABASE_URL, EBILET_COOKIE, CRON_SECRET
+# Edit .env.local with your values:
+#   DATABASE_URL  — Neon PostgreSQL connection string
+#   EBILET_COOKIE — wdctx cookie from sklep.ebilet.pl
+#   CRON_SECRET   — secret for cron job authentication
+
+# Create database tables
+# Run the SQL scripts in scripts/ against your Neon database
 
 # Run development server
-npm run dev
+pnpm dev
+
+# Run tests
+pnpm test
 ```
 
 ## Screenshots
@@ -93,3 +103,7 @@ The dashboard features a dark-themed UI with three main views:
 1. **Overview** — hero stats (available tickets, hourly sales, velocity, sellout prediction) + velocity/GA charts
 2. **Sectors** — expandable zone groups with per-sector availability cards and status badges
 3. **AleBilet** — resale market stats, event cards with category breakdowns, and sold tickets history table
+
+## License
+
+[MIT](LICENSE)

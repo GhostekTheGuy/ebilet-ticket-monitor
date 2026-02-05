@@ -1,6 +1,6 @@
 import React from "react"
 import type { Metadata } from 'next'
-import { DM_Sans, Geist_Mono } from 'next/font/google'
+import { DM_Sans } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
@@ -9,7 +9,6 @@ const dmSans = DM_Sans({
   variable: "--font-dm-sans",
   weight: ["300", "400", "500", "600", "700"],
 });
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: 'eBilet Monitor - Real-time Ticket Tracking',

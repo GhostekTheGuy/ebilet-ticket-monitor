@@ -8,6 +8,7 @@ import { SECTORS, WATCHED_SECTORS, SectorData, HistoryPoint, ApiResponse, AleBil
 import { fetchTicketData, fetchHistory, fetchAleBiletData, fetchAleBiletSoldTickets } from '@/lib/api';
 import { RefreshCw, Search, Menu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { calculateSalesMetrics } from '@/lib/analytics';
 
 import { OverviewPage } from '@/components/pages/overview-page';
 import { SectorsPage } from '@/components/pages/sectors-page';
@@ -156,25 +157,7 @@ export default function Dashboard() {
 
   // Computed values for overview
   const totalAvailable = sectors.reduce((sum, s) => sum + s.available, 0);
-  const oneHourAgo = Date.now() - 3600000;
-  const hourAgoPoint = history.find(h => h.timestamp >= oneHourAgo) || history[0];
-
-  const ticketsSoldLastHour = hourAgoPoint
-    ? Math.max(0, hourAgoPoint.totalAvailable - totalAvailable)
-    : 0;
-
-  const timeSinceHourAgo = hourAgoPoint
-    ? (Date.now() - hourAgoPoint.timestamp) / 60000
-    : 0;
-
-  const salesRate = timeSinceHourAgo > 0
-    ? ticketsSoldLastHour / timeSinceHourAgo
-    : 0;
-
-  const minutesToSellout = salesRate > 0 ? totalAvailable / salesRate : 0;
-  const selloutDate = salesRate > 0
-    ? new Date(Date.now() + minutesToSellout * 60000)
-    : null;
+  const { ticketsSoldLastHour, salesRate, selloutDate } = calculateSalesMetrics(totalAvailable, history);
 
   const now = new Date();
   const greeting = now.getHours() < 12 ? 'Dzień dobry' : now.getHours() < 18 ? 'Dzień dobry' : 'Dobry wieczór';

@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { HistoryPoint } from '@/lib/types';
+import { sampleDataPoints } from '@/lib/analytics';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 
 interface VelocityChartProps {
@@ -10,30 +11,6 @@ interface VelocityChartProps {
 }
 
 type TimeRange = '1h' | '6h' | '12h' | '24h' | 'all';
-
-const SAMPLE_INTERVAL_MS = 3 * 60 * 60 * 1000;
-
-function sampleDataPoints(data: HistoryPoint[]): HistoryPoint[] {
-  if (data.length <= 50) return data;
-
-  const sampled: HistoryPoint[] = [];
-  let lastBucketTime = 0;
-
-  for (const point of data) {
-    const bucketTime = Math.floor(point.timestamp / SAMPLE_INTERVAL_MS) * SAMPLE_INTERVAL_MS;
-
-    if (bucketTime !== lastBucketTime) {
-      sampled.push(point);
-      lastBucketTime = bucketTime;
-    }
-  }
-
-  if (sampled.length > 0 && sampled[sampled.length - 1] !== data[data.length - 1]) {
-    sampled.push(data[data.length - 1]);
-  }
-
-  return sampled;
-}
 
 export function VelocityChart({ history }: VelocityChartProps) {
   const [timeRange, setTimeRange] = useState<TimeRange>('all');

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 import type { AleBiletTicket, AleBiletSoldTicket, AleBiletEventData } from '@/lib/types';
 import { ALEBILET_EVENTS } from '@/lib/types';
+import { findSoldTickets } from '@/lib/analytics';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -114,39 +115,6 @@ async function saveSoldTickets(soldTickets: AleBiletSoldTicket[]): Promise<void>
   } catch (error) {
     console.error('[AleBilet] Error saving sold tickets:', error);
   }
-}
-
-function findSoldTickets(
-  previousTickets: AleBiletTicket[],
-  currentTickets: AleBiletTicket[]
-): AleBiletSoldTicket[] {
-  const soldTickets: AleBiletSoldTicket[] = [];
-  const currentMap = new Map(currentTickets.map(t => [t.id, t]));
-  const now = Date.now();
-
-  for (const prev of previousTickets) {
-    const current = currentMap.get(prev.id);
-
-    if (!current) {
-      // Ticket completely gone - sold out
-      soldTickets.push({
-        ...prev,
-        soldAt: now,
-        previousQuantity: prev.quantity,
-        soldQuantity: prev.quantity,
-      });
-    } else if (current.quantity < prev.quantity) {
-      // Quantity decreased
-      soldTickets.push({
-        ...prev,
-        soldAt: now,
-        previousQuantity: prev.quantity,
-        soldQuantity: prev.quantity - current.quantity,
-      });
-    }
-  }
-
-  return soldTickets;
 }
 
 async function fetchEventData(event: typeof ALEBILET_EVENTS[0]): Promise<AleBiletEventData> {

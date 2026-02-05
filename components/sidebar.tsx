@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 
 interface NavItem {
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
   label: string;
   id: string;
 }
