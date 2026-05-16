@@ -60,12 +60,15 @@ export function GAChart({ history }: GAChartProps) {
     return gaHistory.filter(point => point.timestamp >= cutoff);
   }, [gaHistory, timeRange]);
 
-  const baselineTickets = filteredHistory[0]?.gaAvailable || 1;
+  const firstGA = filteredHistory.find(p => typeof p.gaAvailable === 'number' && p.gaAvailable > 0)?.gaAvailable;
+  const baselineTickets = firstGA ?? 0;
 
   const chartData = filteredHistory.map(point => {
-    const gaAvailable = point.gaAvailable || 0;
-    const percentChange = ((gaAvailable - baselineTickets) / baselineTickets) * 100;
-    const ticketsSoldFromStart = baselineTickets - gaAvailable;
+    const gaAvailable = typeof point.gaAvailable === 'number' ? point.gaAvailable : 0;
+    const percentChange = baselineTickets > 0
+      ? ((gaAvailable - baselineTickets) / baselineTickets) * 100
+      : 0;
+    const ticketsSoldFromStart = baselineTickets > 0 ? baselineTickets - gaAvailable : 0;
     const date = new Date(point.timestamp);
     return {
       time: `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`,
@@ -86,9 +89,12 @@ export function GAChart({ history }: GAChartProps) {
   const yMax = Math.ceil((Math.max(0, maxPercent) + padding) * 10) / 10;
 
   const totalChange = chartData[chartData.length - 1]?.percentChange || 0;
-  const ticketsSold = baselineTickets - (filteredHistory[filteredHistory.length - 1]?.gaAvailable || baselineTickets);
+  const lastGA = filteredHistory[filteredHistory.length - 1]?.gaAvailable;
+  const ticketsSold = baselineTickets > 0 && typeof lastGA === 'number'
+    ? baselineTickets - lastGA
+    : 0;
 
-  if (gaHistory.length < 2) {
+  if (gaHistory.length < 2 || baselineTickets === 0) {
     return null;
   }
 
